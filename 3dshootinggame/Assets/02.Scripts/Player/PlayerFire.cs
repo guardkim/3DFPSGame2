@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class PlayerFire : MonoBehaviour
 {
-    // ÇÊ¿ä ¼Ó¼º
-    // - ÆøÅº ¹ß»ç À§Ä¡
+    // í•„ìš” ì†ì„±
+    // - í­íƒ„ ë°œì‚¬ ìœ„ì¹˜
     public GameObject FirePosition;
-    // - ÆøÅº ÇÁ¸®ÆÕ
+    // - í­íƒ„ í”„ë¦¬íŒ¹
     public GameObject BombPrefab;
 
     public float ThrowPower = 15f;
@@ -16,8 +16,6 @@ public class PlayerFire : MonoBehaviour
     private float _fireTimer = 0.1f;
     private int _currentBoomCount = 3;
     private int _fireCurrentCount = 50;
-
-    private bool _isReloading = false;
 
     public ParticleSystem BulletEffect;
 
@@ -46,8 +44,8 @@ public class PlayerFire : MonoBehaviour
             FireBoom();
             _buttonDownTimer = 0.0f;
         }
-        // ÃÑ¾Ë ¹ß»ç(·¹ÀÌÀú ¹æ½Ä)
-        // 1. ¿ŞÂÊ ¹öÆ° ÀÔ·Â ¹Ş±â
+        // ì´ì•Œ ë°œì‚¬(ë ˆì´ì € ë°©ì‹)
+        // 1. ì™¼ìª½ ë²„íŠ¼ ì…ë ¥ ë°›ê¸°
         if (Input.GetMouseButton(0))
         {
             if(UI_Manager.Instance.IsReloading == true) return;
@@ -55,15 +53,15 @@ public class PlayerFire : MonoBehaviour
             if(_fireTimer <= 0.0f && _fireCurrentCount > 0)
             {
                 _fireCurrentCount--;
-                // 2. ·¹ÀÌ¸¦ »ı¼ºÇÏ°í ¹ß»ç À§Ä¡¿Í ÁøÇà ¹æÇâÀ» ¼³Á¤
+                // 2. ë ˆì´ë¥¼ ìƒì„±í•˜ê³  ë°œì‚¬ ìœ„ì¹˜ì™€ ì§„í–‰ ë°©í–¥ì„ ì„¤ì •
                 Ray ray = new Ray(FirePosition.transform.position, Camera.main.transform.forward);
-                // 3. ·¹ÀÌ¿Í ºÎµóÈù ¹°Ã¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÒ º¯¼ö¸¦ »ı¼º
+                // 3. ë ˆì´ì™€ ë¶€ë”›íŒ ë¬¼ì²´ì˜ ì •ë³´ë¥¼ ì €ì¥í•  ë³€ìˆ˜ë¥¼ ìƒì„±
                 RaycastHit hitInfo = new RaycastHit();
-                // 4. ·¹ÀÌ¸¦ ¹ß»çÇÑ´ÙÀ½ 
+                // 4. ë ˆì´ë¥¼ ë°œì‚¬í•œë‹¤ìŒ 
                 bool isHit = Physics.Raycast(ray, out hitInfo);
-                if (isHit) //  º¯¼ö¿¡ µ¥ÀÌÅÍ°¡ ÀÖ´Ù¸é(ºÎµúÇû´Ù¸é)
+                if (isHit) //  ë³€ìˆ˜ì— ë°ì´í„°ê°€ ìˆë‹¤ë©´(ë¶€ë”ªí˜”ë‹¤ë©´)
                 {
-                    // ÇÇ°İ ÀÌÆåÆ® »ı¼º(Ç¥½Ã)
+                    // í”¼ê²© ì´í™íŠ¸ ìƒì„±(í‘œì‹œ)
                     BulletEffect.transform.position = hitInfo.point;
                     BulletEffect.transform.forward = hitInfo.normal;
                     BulletEffect.Play();
@@ -72,9 +70,9 @@ public class PlayerFire : MonoBehaviour
                 _fireTimer = FireCoolTime;
             }
         }
-            // Ray : ·¹ÀÌÀú (½ÃÀÛÀ§Ä¡, ¹æÇâ)
-            // RayCast : ·¹ÀÌÀú¸¦ ¹ß»ç
-            // RayCastHit : ·¹ÀÌÀú°¡ ¹°Ã¼¿Í ºÎµóÇû´Ù¸é, ±× Á¤º¸¸¦ ÀúÀåÇÏ´Â ±¸Á¶Ã¼
+            // Ray : ë ˆì´ì € (ì‹œì‘ìœ„ì¹˜, ë°©í–¥)
+            // RayCast : ë ˆì´ì €ë¥¼ ë°œì‚¬
+            // RayCastHit : ë ˆì´ì €ê°€ ë¬¼ì²´ì™€ ë¶€ë”›í˜”ë‹¤ë©´, ê·¸ ì •ë³´ë¥¼ ì €ì¥í•˜ëŠ” êµ¬ì¡°ì²´
 
         if(Input.GetKeyDown(KeyCode.R))
         {

@@ -4,8 +4,8 @@ using System.Collections;
 using Unity.Android.Gradle.Manifest;
 public class PlayerMove : MonoBehaviour
 {
-    // ¸ñÇ¥ : wasd¸¦ ´©¸£¸é Ä³¸¯ÅÍ¸¦ ÀÌµ¿½ÃÅ°°í ½Í´Ù.
-    // ÀÌµ¿¼Óµµ
+    // ëª©í‘œ : wasdë¥¼ ëˆ„ë¥´ë©´ ìºë¦­í„°ë¥¼ ì´ë™ì‹œí‚¤ê³  ì‹¶ë‹¤.
+    // ì´ë™ì†ë„
     public PlayerStatSO PlayerStat;
 
     private bool _isJumping = false;
@@ -16,8 +16,8 @@ public class PlayerMove : MonoBehaviour
     private bool _isFall = false;
     private bool _isStaminaRegen = false;
 
-    private const float GRAVITY = -9.8f;    // Áß·Â
-    private float _yVelocity = 0f;          // Áß·Â°¡¼Óµµ
+    private const float GRAVITY = -9.8f;    // ì¤‘ë ¥
+    private float _yVelocity = 0f;          // ì¤‘ë ¥ê°€ì†ë„
     private Vector3 _dir;
 
     private Animator _ani;
@@ -45,7 +45,7 @@ public class PlayerMove : MonoBehaviour
             Jump();
             Run();
             
-            // 3. ¹æÇâ¿¡ µû¶ó ÇÃ·¹ÀÌ¾î¸¦ ÀÌµ¿ÇÑ´Ù.
+            // 3. ë°©í–¥ì— ë”°ë¼ í”Œë ˆì´ì–´ë¥¼ ì´ë™í•œë‹¤.
             _characterController.Move(_dir * PlayerStat.MoveSpeed * Time.deltaTime);
         }
     }
@@ -56,7 +56,7 @@ public class PlayerMove : MonoBehaviour
 
         _dir = new Vector3(h, v, _dir.z);
         _dir = _dir.normalized;
-        // 2-1.¸ŞÀÎ Ä«¸Ş¶ó¸¦ ±âÁØÀ¸·Î ¹æÇâÀ» º¯È¯ÇÑ´Ù.
+        // 2-1.ë©”ì¸ ì¹´ë©”ë¼ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ë°©í–¥ì„ ë³€í™˜í•œë‹¤.
         //_dir = Camera.main.transform.TransformDirection(_dir);
 
         _characterController.Move(_dir * PlayerStat.MoveSpeed * Time.deltaTime);
@@ -70,7 +70,7 @@ public class PlayerMove : MonoBehaviour
         }
         if(_isFall)
         {
-            // 4. Áß·Â Àû¿ë
+            // 4. ì¤‘ë ¥ ì ìš©
             _yVelocity += GRAVITY * Time.deltaTime;
             _dir.y = _yVelocity;
         }
@@ -114,25 +114,25 @@ public class PlayerMove : MonoBehaviour
     }
     private void Move()
     {
-        // 1. Å°º¸µå ÀÔ·ÂÀ» ¹Ş´Â´Ù.
+        // 1. í‚¤ë³´ë“œ ì…ë ¥ì„ ë°›ëŠ”ë‹¤.
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
-        // 2. ÀÔ·ÂÀ¸·ÎºÎÅÍ ¹æÇâÀ» ¼³Á¤ÇÑ´Ù.
+        // 2. ì…ë ¥ìœ¼ë¡œë¶€í„° ë°©í–¥ì„ ì„¤ì •í•œë‹¤.
         _dir = new Vector3(h, 0, v);
         _dir = _dir.normalized;
 
-        // 2-1.¸ŞÀÎ Ä«¸Ş¶ó¸¦ ±âÁØÀ¸·Î ¹æÇâÀ» º¯È¯ÇÑ´Ù.
+        // 2-1.ë©”ì¸ ì¹´ë©”ë¼ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ë°©í–¥ì„ ë³€í™˜í•œë‹¤.
         _dir = Camera.main.transform.TransformDirection(_dir);
         _ani.SetTrigger("WALK");
 
-        // 4. Áß·Â Àû¿ë
+        // 4. ì¤‘ë ¥ ì ìš©
         _yVelocity += GRAVITY * Time.deltaTime;
         _dir.y = _yVelocity;
     }
     private void Run()
     {
-        // 5. ´Ş¸®±â Àû¿ë
+        // 5. ë‹¬ë¦¬ê¸° ì ìš©
         if (Input.GetKey(KeyCode.LeftShift) && _isRunning == false && _isStaminaRegen == false)
         {
             PlayerStat.MoveSpeed = 15f;
@@ -144,20 +144,20 @@ public class PlayerMove : MonoBehaviour
             _isRunning = false;
         }
 
-        // 6. ½ºÅÂ¹Ì³ª °¨¼Ò
+        // 6. ìŠ¤íƒœë¯¸ë‚˜ ê°ì†Œ
         StaminaChange();
 
     }
     private void Jump()
     {
-        // Ä³¸¯ÅÍ°¡ ¶¥ À§¿¡ ÀÖ´Ù¸é
+        // ìºë¦­í„°ê°€ ë•… ìœ„ì— ìˆë‹¤ë©´
         if (_characterController.isGrounded)
         {
             _isJumping = false;
             _isJumping2 = false;
         }
 
-        // 3. Á¡ÇÁ Àû¿ë
+        // 3. ì í”„ ì ìš©
         if (Input.GetKeyDown(KeyCode.Space) && _isJumping == false)
         {
             Debug.Log("Jump");

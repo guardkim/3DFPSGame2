@@ -900,12 +900,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e7c4c281279ca741a3274dc6b2dad9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MoveSpeed: 10
-  JumpPower: 10
-  Stamina: 1
-  RollSpeed: 15
-  RollDuration: 0.5
-  StaminaChangeRate: 1
+  PlayerStat: {fileID: 0}
   StaminaSlider: {fileID: 0}
 --- !u!143 &1385521380
 CharacterController:
@@ -1397,12 +1392,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e7c4c281279ca741a3274dc6b2dad9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MoveSpeed: 10
-  JumpPower: 10
-  Stamina: 1
-  RollSpeed: 15
-  RollDuration: 0.5
-  StaminaChangeRate: 0.1
+  PlayerStat: {fileID: 11400000, guid: b9b10098ecf42844fb750abe36b73108, type: 2}
   StaminaSlider: {fileID: 1512583133}
 --- !u!143 &1617560563
 CharacterController:

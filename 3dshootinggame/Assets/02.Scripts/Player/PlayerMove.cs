@@ -6,13 +6,7 @@ public class PlayerMove : MonoBehaviour
 {
     // 목표 : wasd를 누르면 캐릭터를 이동시키고 싶다.
     // 이동속도
-    public float MoveSpeed = 10.0f;
-    public float JumpPower = 10f;
-    public float Stamina = 0.1f;
-    public float RollSpeed = 15f;
-    public float RollDuration = 0.5f;
-
-    public float StaminaChangeRate = 1.0f;
+    public PlayerStatSO PlayerStat;
 
     private bool _isJumping = false;
     private bool _isJumping2 = false;
@@ -41,7 +35,7 @@ public class PlayerMove : MonoBehaviour
         _isCliming = (_characterController.collisionFlags & CollisionFlags.Sides) != 0;
 
         Rolling();
-        if (_isCliming && Stamina > 0.0f)
+        if (_isCliming && PlayerStat.Stamina > 0.0f)
         {
             Climing();
         }
@@ -52,7 +46,7 @@ public class PlayerMove : MonoBehaviour
             Run();
             
             // 3. 방향에 따라 플레이어를 이동한다.
-            _characterController.Move(_dir * MoveSpeed * Time.deltaTime);
+            _characterController.Move(_dir * PlayerStat.MoveSpeed * Time.deltaTime);
         }
     }
     private void Climing()
@@ -65,11 +59,11 @@ public class PlayerMove : MonoBehaviour
         // 2-1.메인 카메라를 기준으로 방향을 변환한다.
         //_dir = Camera.main.transform.TransformDirection(_dir);
 
-        _characterController.Move(_dir * MoveSpeed * Time.deltaTime);
+        _characterController.Move(_dir * PlayerStat.MoveSpeed * Time.deltaTime);
 
-        Stamina -= StaminaChangeRate * Time.deltaTime; ;
-        StaminaSlider.value = Stamina;
-        if(Stamina <= 0.0f)
+        PlayerStat.Stamina -= PlayerStat.StaminaChangeRate * Time.deltaTime; ;
+        StaminaSlider.value = PlayerStat.Stamina;
+        if(PlayerStat.Stamina <= 0.0f)
         {
             _isFall = true;
             _isCliming = false;
@@ -87,12 +81,12 @@ public class PlayerMove : MonoBehaviour
     }
     private void Rolling()
     {
-       if (Input.GetKeyDown(KeyCode.E) && !_isRolling && Stamina >= 0.3f)
+       if (Input.GetKeyDown(KeyCode.E) && !_isRolling && PlayerStat.Stamina >= 0.3f)
        {
             _isRolling = true;
-            Stamina -= 0.3f;
-            Stamina = Mathf.Clamp(Stamina, 0f, 1f);
-            StaminaSlider.value = Stamina;
+            PlayerStat.Stamina -= 0.3f;
+            PlayerStat.Stamina = Mathf.Clamp(PlayerStat.Stamina, 0f, 1f);
+            StaminaSlider.value = PlayerStat.Stamina;
             StartCoroutine(Roll());
        }
     }
@@ -101,7 +95,7 @@ public class PlayerMove : MonoBehaviour
         float elapsed = 0f;
         _dir = Camera.main.transform.forward;
 
-        while (elapsed<RollDuration)
+        while (elapsed<PlayerStat.RollDuration)
         {
             if (_characterController.isGrounded && _yVelocity < 0f)
             {
@@ -110,7 +104,7 @@ public class PlayerMove : MonoBehaviour
 
             _yVelocity += GRAVITY* Time.deltaTime;
 
-            Vector3 move = _dir.normalized * RollSpeed + Vector3.up * _yVelocity;
+            Vector3 move = _dir.normalized * PlayerStat.RollSpeed + Vector3.up * _yVelocity;
             _characterController.Move(move* Time.deltaTime);
 
             elapsed += Time.deltaTime;
@@ -141,12 +135,12 @@ public class PlayerMove : MonoBehaviour
         // 5. 달리기 적용
         if (Input.GetKey(KeyCode.LeftShift) && _isRunning == false && _isStaminaRegen == false)
         {
-            MoveSpeed = 15f;
+            PlayerStat.MoveSpeed = 15f;
             _isRunning = true;
         }
         if (Input.GetKeyUp(KeyCode.LeftShift) && _isRunning == true)
         {
-            MoveSpeed = 10f;
+            PlayerStat.MoveSpeed = 10f;
             _isRunning = false;
         }
 
@@ -167,13 +161,13 @@ public class PlayerMove : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && _isJumping == false)
         {
             Debug.Log("Jump");
-            _yVelocity = JumpPower;
+            _yVelocity = PlayerStat.JumpPower;
             _isJumping = true;
         }
         if( Input.GetKeyDown(KeyCode.Space) && _isJumping == true && _isJumping2 == false)
         {
             Debug.Log("DoubleJump");
-            _yVelocity = JumpPower;
+            _yVelocity = PlayerStat.JumpPower;
             _isJumping2 = true;
         }
 
@@ -182,21 +176,21 @@ public class PlayerMove : MonoBehaviour
     {
         if (_isRunning == true )
         {
-            Stamina -= StaminaChangeRate * Time.deltaTime;
+            PlayerStat.Stamina -= PlayerStat.StaminaChangeRate * Time.deltaTime;
         }
         else
         {
-            Stamina += StaminaChangeRate * 2 * Time.deltaTime;
+            PlayerStat.Stamina += PlayerStat.StaminaChangeRate * 2 * Time.deltaTime;
         }
-        Stamina = Mathf.Clamp(Stamina, 0, 1);
-        StaminaSlider.value = Stamina;
-        if (Stamina <= 0.0f)
+        PlayerStat.Stamina = Mathf.Clamp(PlayerStat.Stamina, 0, 1);
+        StaminaSlider.value = PlayerStat.Stamina;
+        if (PlayerStat.Stamina <= 0.0f)
         {
             _isRunning = false;
-            MoveSpeed = 10.0f;
+            PlayerStat.MoveSpeed = 10.0f;
             _isStaminaRegen = true;
         }
-        else if( Stamina >= 1.0f)
+        else if( PlayerStat.Stamina >= 1.0f)
         {
             _isStaminaRegen = false;
         }

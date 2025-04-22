@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d619ca860c391ba428d2c233471b41e4, type: 3}
   m_Name: PlayerStateDataSO
   m_EditorClassIdentifier: 
-  MoveSpeed: 10
+  MoveSpeed: 15
   JumpPower: 10
-  Stamina: 1
+  Stamina: 0.5720055
   StaminaChangeRate: 0.1
   RollSpeed: 15
   RollDuration: 0.5

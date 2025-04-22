@@ -30,7 +30,7 @@ public class PlayerMove : MonoBehaviour
         _characterController = GetComponent<CharacterController>();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         _isCliming = (_characterController.collisionFlags & CollisionFlags.Sides) != 0;
 

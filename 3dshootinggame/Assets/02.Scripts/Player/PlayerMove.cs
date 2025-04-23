@@ -1,13 +1,17 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using Unity.Android.Gradle.Manifest;
+
+[RequireComponent(typeof(CharacterController))]
 public class PlayerMove : MonoBehaviour
 {
-    // 목표 : wasd를 누르면 캐릭터를 이동시키고 싶다.
-    // 이동속도
-    public PlayerStatSO PlayerStat;
+    [Header("설정")]
+    [SerializeField] private PlayerStatSO PlayerStat;
+    [SerializeField] private Slider StaminaSlider;
+    [SerializeField] private float climbingSmoothTime = 0.1f; // 클라이밍 이동 스무딩 시간
 
+    // 상태 변수
     private bool _isJumping = false;
     private bool _isJumping2 = false;
     private bool _isRunning = false;
@@ -16,13 +20,23 @@ public class PlayerMove : MonoBehaviour
     private bool _isFall = false;
     private bool _isStaminaRegen = false;
 
-    private const float GRAVITY = -9.8f;    // 중력
-    private float _yVelocity = 0f;          // 중력가속도
+    // 이동 관련 변수
+    private const float GRAVITY = -9.8f;
+    private float _yVelocity = 0f;
     private Vector3 _dir;
+    private Vector3 _climbVelocity; // 클라이밍 이동 속도
+    private Vector3 _currentClimbVelocity; // 스무딩을 위한 현재 클라이밍 속도
 
+    // 입력 저장 변수
+    private float _horizontalInput;
+    private float _verticalInput;
+    private bool _jumpKeyPressed;
+    private bool _runKeyPressed;
+    private bool _rollKeyPressed;
+
+    // 컴포넌트 캐싱
     private Animator _ani;
     private CharacterController _characterController;
-    public Slider StaminaSlider;
 
     private void Awake()
     {
@@ -30,171 +44,291 @@ public class PlayerMove : MonoBehaviour
         _characterController = GetComponent<CharacterController>();
     }
 
+    void Update()
+    {
+        // 키 입력 처리
+        GetInputs();
+        UpdateAnimations();
+    }
+
     void FixedUpdate()
     {
-        _isCliming = (_characterController.collisionFlags & CollisionFlags.Sides) != 0;
-
-        Rolling();
-        if (_isCliming && PlayerStat.Stamina > 0.0f)
+        // 스태미나 소진 체크 - 가장 먼저 수행
+        if (_isCliming && PlayerStat.Stamina <= 0.0f)
         {
-            Climing();
+            StopClimbing();
         }
-        if (_isRolling == false && _isCliming == false)
+
+        // 상태 업데이트
+        UpdatePlayerState();
+
+        // 움직임 처리
+        if (_isRolling)
+            return;
+
+        if (_isCliming)
         {
-            Move();
-            Jump();
-            Run();
-            
-            // 3. 방향에 따라 플레이어를 이동한다.
-            _characterController.Move(_dir * PlayerStat.MoveSpeed * Time.deltaTime);
+            ProcessClimbing();
+        }
+        else
+        {
+            ProcessMovement();
+        }
+
+        // 스태미나 관리
+        UpdateStamina();
+    }
+
+    #region 입력 처리
+    private void GetInputs()
+    {
+        _horizontalInput = Input.GetAxisRaw("Horizontal");
+        _verticalInput = Input.GetAxisRaw("Vertical");
+        
+        // 점프 입력 감지
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            _jumpKeyPressed = true;
+        }
+        
+        // 달리기 입력 감지
+        _runKeyPressed = Input.GetKey(KeyCode.LeftShift);
+        
+        // 구르기 입력 감지
+        if (Input.GetKeyDown(KeyCode.E) && !_isRolling && PlayerStat.Stamina >= 0.3f)
+        {
+            _rollKeyPressed = true;
         }
     }
-    private void Climing()
+
+    private void UpdateAnimations()
     {
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
+        _ani.SetBool("IsMove", _horizontalInput != 0 || _verticalInput != 0);
+        _ani.SetBool("IsRun", _runKeyPressed);
+    }
+    #endregion
 
-        _dir = new Vector3(h, v, _dir.z);
-        _dir = _dir.normalized;
-        // 2-1.메인 카메라를 기준으로 방향을 변환한다.
-        //_dir = Camera.main.transform.TransformDirection(_dir);
-
-        _characterController.Move(_dir * PlayerStat.MoveSpeed * Time.deltaTime);
-
-        PlayerStat.Stamina -= PlayerStat.StaminaChangeRate * Time.deltaTime; ;
-        StaminaSlider.value = PlayerStat.Stamina;
-        if(PlayerStat.Stamina <= 0.0f)
+    #region 상태 관리
+    private void UpdatePlayerState()
+    {
+        // 벽에 닿아있는지 확인 (측면 충돌)
+        bool isTouchingWall = (_characterController.collisionFlags & CollisionFlags.Sides) != 0;
+        
+        // 클라이밍 상태 시작 (벽에 닿았을 때)
+        if (isTouchingWall && !_isCliming && !_characterController.isGrounded)
         {
-            _isFall = true;
-            _isCliming = false;
+            StartClimbing();
         }
-        if(_isFall)
+        // 클라이밍 상태 종료 (벽에서 떨어졌을 때)
+        else if (!isTouchingWall && _isCliming)
         {
-            // 4. 중력 적용
-            _yVelocity += GRAVITY * Time.deltaTime;
-            _dir.y = _yVelocity;
+            StopClimbing();
         }
+
+        // 구르기 처리
+        if (_rollKeyPressed)
+        {
+            StartRolling();
+            _rollKeyPressed = false;
+        }
+
+        // 달리기 상태 처리
+        UpdateRunningState();
+
+        // 바닥 체크
         if (_characterController.isGrounded)
         {
+            _isJumping = false;
+            _isJumping2 = false;
             _isFall = false;
+            if (_isCliming)
+            {
+                StopClimbing();
+            }
         }
     }
-    private void Rolling()
+
+    private void StartClimbing()
     {
-       if (Input.GetKeyDown(KeyCode.E) && !_isRolling && PlayerStat.Stamina >= 0.3f)
-       {
-            _isRolling = true;
-            PlayerStat.Stamina -= 0.3f;
-            PlayerStat.Stamina = Mathf.Clamp(PlayerStat.Stamina, 0f, 1f);
-            StaminaSlider.value = PlayerStat.Stamina;
-            StartCoroutine(Roll());
-       }
+        _isCliming = true;
+        // 클라이밍 시작 시 중력 영향 제거
+        _yVelocity = 0f;
+        _currentClimbVelocity = Vector3.zero;
+        _climbVelocity = Vector3.zero;
     }
+
+    private void StopClimbing()
+    {
+        if (!_isCliming) return; // 이미 클라이밍 중이 아니면 무시
+
+        _isCliming = false;
+        _isFall = true;
+        // 중력 다시 적용
+        _yVelocity = 0; // 초기 낙하 속도 설정
+        Debug.Log("클라이밍 중단: 스태미나 = " + PlayerStat.Stamina);
+    }
+
+    private void UpdateRunningState()
+    {
+        if (_runKeyPressed && !_isRunning && !_isStaminaRegen)
+        {
+            PlayerStat.MoveSpeed = 15f;
+            _isRunning = true;
+        }
+        else if (!_runKeyPressed && _isRunning)
+        {
+            PlayerStat.MoveSpeed = 10f;
+            _isRunning = false;
+        }
+
+        // 스태미나 소진시 달리기 중단
+        if (PlayerStat.Stamina <= 0.0f && _isRunning)
+        {
+            _isRunning = false;
+            PlayerStat.MoveSpeed = 10.0f;
+            _isStaminaRegen = true;
+        }
+        else if (PlayerStat.Stamina >= 1.0f)
+        {
+            _isStaminaRegen = false;
+        }
+    }
+    #endregion
+
+    #region 이동 처리
+    private void ProcessMovement()
+    {
+        CalculateMovementDirection();
+        ProcessJump();
+        
+        // 캐릭터 이동
+        _characterController.Move(_dir * PlayerStat.MoveSpeed * Time.deltaTime);
+    }
+
+    private void CalculateMovementDirection()
+    {
+        _dir = new Vector3(_horizontalInput, 0, _verticalInput);
+        _dir = _dir.normalized;
+        _dir = Camera.main.transform.TransformDirection(_dir);
+
+        // 중력 적용
+        _yVelocity += GRAVITY * Time.deltaTime;
+        
+        // 그라운드 체크로 중력 최적화
+        if (_characterController.isGrounded && _yVelocity < 0f)
+        {
+            _yVelocity = -2f; // 지면에 붙어있게 하는 작은 중력값
+        }
+        
+        _dir.y = _yVelocity;
+    }
+
+    private void ProcessJump()
+    {
+        if (!_jumpKeyPressed)
+            return;
+
+        if (!_isJumping)
+        {
+            _yVelocity = PlayerStat.JumpPower;
+            _isJumping = true;
+        }
+        else if (_isJumping && !_isJumping2)
+        {
+            _yVelocity = PlayerStat.JumpPower;
+            _isJumping2 = true;
+        }
+        
+        _jumpKeyPressed = false;
+    }
+
+    private void ProcessClimbing()
+    {
+        // 스태미나를 먼저 확인
+        if (PlayerStat.Stamina <= 0f)
+        {
+            StopClimbing();
+            return;
+        }
+        
+        // 클라이밍 중에는 중력 영향 없음
+        _yVelocity = 0;
+        
+        // 벽에서의 이동 방향 계산
+        Vector3 targetVelocity = Vector3.zero;
+        
+        // 카메라 기준으로 상하좌우 이동 가능
+        Vector3 right = Camera.main.transform.right;
+        
+        // 수평면으로 투영 (y값을 0으로)
+        right.y = 0;
+        right.Normalize();
+        
+        // 수직 이동은 월드 Up 벡터 사용
+        targetVelocity = (right * _horizontalInput + Vector3.up * _verticalInput).normalized;
+        
+        // 스무딩 적용 - 부드러운 이동을 위해 (떨림 방지)
+        _climbVelocity = Vector3.SmoothDamp(_climbVelocity, targetVelocity, ref _currentClimbVelocity, climbingSmoothTime);
+        
+        // 실제 이동 적용 (속도는 그대로 유지)
+        _characterController.Move(_climbVelocity * PlayerStat.MoveSpeed * Time.deltaTime);
+        
+        PlayerStat.Stamina -= PlayerStat.StaminaChangeRate * Time.deltaTime;
+        PlayerStat.Stamina = Mathf.Max(0, PlayerStat.Stamina); // 0 미만으로 내려가지 않도록
+        StaminaSlider.value = PlayerStat.Stamina;
+    }
+
+    private void StartRolling()
+    {
+        _isRolling = true;
+        PlayerStat.Stamina -= 0.3f;
+        PlayerStat.Stamina = Mathf.Clamp(PlayerStat.Stamina, 0f, 1f);
+        StaminaSlider.value = PlayerStat.Stamina;
+        StartCoroutine(Roll());
+    }
+
     private IEnumerator Roll()
     {
         float elapsed = 0f;
         _dir = Camera.main.transform.forward;
 
-        while (elapsed<PlayerStat.RollDuration)
+        while (elapsed < PlayerStat.RollDuration)
         {
             if (_characterController.isGrounded && _yVelocity < 0f)
             {
                 _yVelocity = -2f;
             }
 
-            _yVelocity += GRAVITY* Time.deltaTime;
+            _yVelocity += GRAVITY * Time.deltaTime;
 
             Vector3 move = _dir.normalized * PlayerStat.RollSpeed + Vector3.up * _yVelocity;
-            _characterController.Move(move* Time.deltaTime);
+            _characterController.Move(move * Time.deltaTime);
 
             elapsed += Time.deltaTime;
             yield return null;  
         }
         _isRolling = false;
     }
-    private void Move()
+    #endregion
+
+    #region 스태미나 관리
+    private void UpdateStamina()
     {
-        // 1. 키보드 입력을 받는다.
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
-
-        // 2. 입력으로부터 방향을 설정한다.
-        _dir = new Vector3(h, 0, v);
-        _dir = _dir.normalized;
-
-        // 2-1.메인 카메라를 기준으로 방향을 변환한다.
-        _dir = Camera.main.transform.TransformDirection(_dir);
-        _ani.SetTrigger("WALK");
-
-        // 4. 중력 적용
-        _yVelocity += GRAVITY * Time.deltaTime;
-        _dir.y = _yVelocity;
-    }
-    private void Run()
-    {
-        // 5. 달리기 적용
-        if (Input.GetKey(KeyCode.LeftShift) && _isRunning == false && _isStaminaRegen == false)
+        // 스태미나 소모 또는 회복
+        if (_isRunning)
         {
-            PlayerStat.MoveSpeed = 15f;
-            _isRunning = true;
-        }
-        if (Input.GetKeyUp(KeyCode.LeftShift) && _isRunning == true)
-        {
-            PlayerStat.MoveSpeed = 10f;
-            _isRunning = false;
-        }
-
-        // 6. 스태미나 감소
-        StaminaChange();
-
-    }
-    private void Jump()
-    {
-        // 캐릭터가 땅 위에 있다면
-        if (_characterController.isGrounded)
-        {
-            _isJumping = false;
-            _isJumping2 = false;
-        }
-
-        // 3. 점프 적용
-        if (Input.GetKeyDown(KeyCode.Space) && _isJumping == false)
-        {
-            Debug.Log("Jump");
-            _yVelocity = PlayerStat.JumpPower;
-            _isJumping = true;
-        }
-        if( Input.GetKeyDown(KeyCode.Space) && _isJumping == true && _isJumping2 == false)
-        {
-            Debug.Log("DoubleJump");
-            _yVelocity = PlayerStat.JumpPower;
-            _isJumping2 = true;
-        }
-
-    }
-    private void StaminaChange()
-    {
-        if (_isRunning == true )
-        {
+            // 달리기 스태미나 소모
             PlayerStat.Stamina -= PlayerStat.StaminaChangeRate * Time.deltaTime;
         }
-        else
+        else if (!_isCliming) // 클라이밍이 아닐 때만 회복 (클라이밍 스태미나 소모는 ProcessClimbing에서 처리)
         {
             PlayerStat.Stamina += PlayerStat.StaminaChangeRate * 2 * Time.deltaTime;
         }
+
+        // 스태미나 클램프 및 UI 업데이트
         PlayerStat.Stamina = Mathf.Clamp(PlayerStat.Stamina, 0, 1);
         StaminaSlider.value = PlayerStat.Stamina;
-        if (PlayerStat.Stamina <= 0.0f)
-        {
-            _isRunning = false;
-            PlayerStat.MoveSpeed = 10.0f;
-            _isStaminaRegen = true;
-        }
-        else if( PlayerStat.Stamina >= 1.0f)
-        {
-            _isStaminaRegen = false;
-        }
-
     }
+    #endregion
 }
 

@@ -1,20 +1,17 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.UIElements;
 
-public class BombPool : MonoBehaviour
+public class BombPool : Singleton<BombPool>
 {
 
     public List<Bomb> BombPrefab;
     public int PoolSize = 30;
     private List<Bomb> _bombs;
-    public static BombPool Instance;
 
     private void Awake()
     {
-        if (Instance == null)
-            Instance = this;
 
         int bombPrefabCount = BombPrefab.Count;
         _bombs = new List<Bomb>(PoolSize * bombPrefabCount);

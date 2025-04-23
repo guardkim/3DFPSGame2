@@ -1,12 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerFire : MonoBehaviour
 {
-    // 필요 속성
-    // - 폭탄 발사 위치
     public GameObject FirePosition;
-    // - 폭탄 프리팹
     public GameObject BombPrefab;
+    public GameObject BulletFirePosition;
+    public ParticleSystem BulletEffect;
 
     public float ThrowPower = 15f;
     public float FireCoolTime = 0.1f;
@@ -17,8 +16,12 @@ public class PlayerFire : MonoBehaviour
     private int _currentBoomCount = 3;
     private int _fireCurrentCount = 50;
 
-    public ParticleSystem BulletEffect;
+    private Animator _ani;
 
+    private void Awake()
+    {
+        _ani = GetComponent<Animator>();
+    }
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -44,8 +47,6 @@ public class PlayerFire : MonoBehaviour
             FireBoom();
             _buttonDownTimer = 0.0f;
         }
-        // 총알 발사(레이저 방식)
-        // 1. 왼쪽 버튼 입력 받기
         if (Input.GetMouseButton(0))
         {
             if(UI_Manager.Instance.IsReloading == true) return;
@@ -53,27 +54,31 @@ public class PlayerFire : MonoBehaviour
             if(_fireTimer <= 0.0f && _fireCurrentCount > 0)
             {
                 _fireCurrentCount--;
-                // 2. 레이를 생성하고 발사 위치와 진행 방향을 설정
-                Ray ray = new Ray(FirePosition.transform.position, Camera.main.transform.forward);
-                // 3. 레이와 부딛힌 물체의 정보를 저장할 변수를 생성
+                _ani.SetTrigger("SHOOT");
+                Ray ray = new Ray(BulletFirePosition.transform.position, Camera.main.transform.forward);
                 RaycastHit hitInfo = new RaycastHit();
-                // 4. 레이를 발사한다음 
+                BulletTrailPool.Instance.Fire(BulletFirePosition.transform.position, Camera.main.transform.forward);
                 bool isHit = Physics.Raycast(ray, out hitInfo);
-                if (isHit) //  변수에 데이터가 있다면(부딪혔다면)
+                if (isHit) 
                 {
-                    // 피격 이펙트 생성(표시)
+          
                     BulletEffect.transform.position = hitInfo.point;
                     BulletEffect.transform.forward = hitInfo.normal;
                     BulletEffect.Play();
+
+                    if(hitInfo.collider.gameObject.CompareTag("Enemy"))
+                    {
+                        Enemy enemy = hitInfo.collider.gameObject.GetComponent<Enemy>();
+                        Damage damage;
+                        damage.Value = 10;
+                        damage.From = this.gameObject;
+                        enemy.TakeDamage(damage);
+                    }
                 }
                 UI_Manager.Instance.SetBulletCount(_fireCurrentCount);
                 _fireTimer = FireCoolTime;
             }
         }
-            // Ray : 레이저 (시작위치, 방향)
-            // RayCast : 레이저를 발사
-            // RayCastHit : 레이저가 물체와 부딛혔다면, 그 정보를 저장하는 구조체
-
         if(Input.GetKeyDown(KeyCode.R))
         {
             if (_fireCurrentCount < FireMaxCount)

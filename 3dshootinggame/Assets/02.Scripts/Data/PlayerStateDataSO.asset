@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: PlayerStateDataSO
   m_EditorClassIdentifier: 
   MoveSpeed: 15
-  JumpPower: 10
-  Stamina: 0.5720055
+  JumpPower: 4
+  Stamina: 1
   StaminaChangeRate: 0.1
   RollSpeed: 15
   RollDuration: 0.5

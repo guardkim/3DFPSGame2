@@ -166,7 +166,6 @@ public class PlayerMove : MonoBehaviour
         _isFall = true;
         // 중력 다시 적용
         _yVelocity = 0; // 초기 낙하 속도 설정
-        Debug.Log("클라이밍 중단: 스태미나 = " + PlayerStat.Stamina);
     }
 
     private void UpdateRunningState()

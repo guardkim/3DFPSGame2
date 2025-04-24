@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using TreeEditor;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour
 {
@@ -34,10 +35,13 @@ public class Enemy : MonoBehaviour
     private Vector3 _patrolPosition;
     private bool _isPatrol = false;
     private bool _isPatrolTurn = false;
-    
+    private NavMeshAgent _agent;
 
     private void Start()
     {
+        _agent = GetComponent<NavMeshAgent>();
+        _agent.speed = MoveSpeed;
+
         _startPosition = transform.position;
         _player = GameObject.FindGameObjectWithTag("Player");
         _characterController = GetComponent<CharacterController>();
@@ -194,8 +198,9 @@ public class Enemy : MonoBehaviour
         }
 
         // 행동 : 플레이어를 추적한다.
-        Vector3 dir = (_player.transform.position - transform.position).normalized;
-        _characterController.Move(dir * MoveSpeed * Time.deltaTime);
+        //Vector3 dir = (_player.transform.position - transform.position).normalized;
+        //_characterController.Move(dir * MoveSpeed * Time.deltaTime);
+        _agent.SetDestination(_player.transform.position);
 
         
     }
@@ -212,8 +217,9 @@ public class Enemy : MonoBehaviour
             Debug.Log("상태 전환 : Return -> Trace");
             CurrentState = EnemyState.Trace;
         }
-        Vector3 dir = (_startPosition - transform.position).normalized;
-        _characterController.Move(dir * MoveSpeed * Time.deltaTime);
+        //Vector3 dir = (_startPosition - transform.position).normalized;
+        //_characterController.Move(dir * MoveSpeed * Time.deltaTime);
+        _agent.SetDestination(_startPosition);
     }
     private void Attack()
     {
@@ -234,6 +240,8 @@ public class Enemy : MonoBehaviour
     }
     private IEnumerator Damaged_Coroutine()
     {
+        _agent.isStopped = false;
+        _agent.ResetPath();
         yield return new WaitForSeconds(DamagedTime);
         Debug.Log("상태 전환 : Damaged -> Trace");
         CurrentState = EnemyState.Trace;
@@ -241,6 +249,7 @@ public class Enemy : MonoBehaviour
     private IEnumerator Die_Coroutine()
     {
         yield return new WaitForSeconds(2f);
+        Debug.Log("상태 전환 : Die");
         gameObject.SetActive(false);
     }
 

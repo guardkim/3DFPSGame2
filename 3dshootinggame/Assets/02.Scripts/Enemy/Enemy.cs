@@ -29,20 +29,20 @@ public class Enemy : MonoBehaviour
     private GameObject _player;
     private CharacterController _characterController;
     private Vector3 _startPosition;
-    private Vector3 _tempPoint1;
-    private Vector3 _tempPoint2;
-    private Vector3 _tempPoint3;
+    public List<Vector3> _patrolPoints;
+    private float _patrolRadius = 10.0f;
+    private Vector3 _patrolPosition;
+    private bool _isPatrol = false;
+    private bool _isPatrolTurn = false;
+    
+
     private void Start()
     {
         _startPosition = transform.position;
         _player = GameObject.FindGameObjectWithTag("Player");
         _characterController = GetComponent<CharacterController>();
-        _tempPoint1 = transform.position;
-        _tempPoint2 = transform.position;
-        _tempPoint3 = transform.position;
-        _tempPoint1.x += 20.0f;
-        _tempPoint2.z += 20.0f;
-        _tempPoint3.z -= 20.0f;
+        _patrolPoints = new List<Vector3>();
+        CreatePatrolPoint();
     }
 
     private void Update()
@@ -76,10 +76,61 @@ public class Enemy : MonoBehaviour
             }
         }
     }
+    private void CreatePatrolPoint()
+    {
+        _patrolPoints.Clear();
+        for (int i = 0; i < 3; i++)
+        {
+            Vector2 randomPosition = Random.insideUnitSphere * _patrolRadius;
+            Vector3 targetPosition = new Vector3(randomPosition.x, 1.0f, randomPosition.y);
+            _patrolPoints.Add(targetPosition);
+        }
+    }
+    private void MoveToTarget()
+    {
+        if (_isPatrol == false)
+        {
+            int randomIndex = Random.Range(0, _patrolPoints.Count);
+            _patrolPosition = _patrolPoints[randomIndex];
+            _isPatrol = true;
+        }
+        else
+        {
+
+            Vector3 dir = (_patrolPosition - transform.position).normalized;
+            _characterController.Move(dir * MoveSpeed * Time.deltaTime);
+
+            // 돌아오는 상태인 경우
+            if (_isPatrolTurn == true)
+            {
+
+                if (Vector3.Distance(transform.position, _startPosition) < 0.1f)
+                {
+                    _isPatrol = false;
+                    _isPatrolTurn = false;
+                }
+            }
+            // 순찰 위치로 이동 중인 경우
+            else
+            {
+                Debug.Log(Vector3.Distance(transform.position, _patrolPosition));
+
+                if (Vector3.Distance(transform.position, _patrolPosition) < 0.1f)
+                {
+                    _patrolPosition = _startPosition;
+                    _isPatrolTurn = true;
+                }
+            }
+        }
+    }
     public void Patrol()
     {
-        Vector3 targetPosition = _tempPoint1;
-        _characterController.Move(_tempPoint1 * MoveSpeed * Time.deltaTime);
+        if (Vector3.Distance(transform.position, _player.transform.position) < FindDistance)
+        {
+            Debug.Log("상태 전환 : Patrol -> Trace");
+            CurrentState = EnemyState.Trace;
+        }
+        MoveToTarget();
     }
     public void TakeDamage(Damage damage)
     {
@@ -89,7 +140,8 @@ public class Enemy : MonoBehaviour
         }
 
         Health -= damage.Value;
-        if(Health <= 0)
+        Knockback(10.0f, damage.From);
+        if (Health <= 0)
         {
             Debug.Log($"상태 전환 : {CurrentState} -> Die");
             CurrentState = EnemyState.Die;
@@ -101,6 +153,12 @@ public class Enemy : MonoBehaviour
         _damagedTimer = 0.0f;
         CurrentState = EnemyState.Damaged;
         StartCoroutine(Damaged_Coroutine());
+    }
+    private void Knockback(float force, GameObject from)
+    {
+        Vector3 dir = (transform.position - from.transform.position).normalized;
+        dir.y = 0.0f;
+        _characterController.Move(dir * force);
     }
     private void Idle()
     {
@@ -115,7 +173,7 @@ public class Enemy : MonoBehaviour
     }
     private IEnumerator Idle_Coroutine()
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(3f);
         if(CurrentState == EnemyState.Idle)
         {
             Debug.Log("상태 전환 : Idle -> Patrol");
@@ -143,7 +201,7 @@ public class Enemy : MonoBehaviour
     }
     private void Return()
     {
-        if (Vector3.Distance(transform.position, _startPosition) < _characterController.minMoveDistance)
+        if (Vector3.Distance(transform.position, _startPosition) < 0.1f)
         {
             Debug.Log("상태 전환 : Return -> Idle");
             transform.position = _startPosition;
@@ -167,15 +225,12 @@ public class Enemy : MonoBehaviour
             return;
         }
         
-        // 행동 : 플레이어를 추적한다.
         _attackTimer += Time.deltaTime;
         if(_attackTimer >= AttackCooltime)
         {
             Debug.Log("플레이어 공격");
             _attackTimer = 0.0f;
-            
         }
-
     }
     private IEnumerator Damaged_Coroutine()
     {

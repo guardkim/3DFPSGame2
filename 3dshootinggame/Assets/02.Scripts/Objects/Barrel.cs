@@ -15,6 +15,7 @@ public class Barrel : MonoBehaviour
     private Vector3 _pendingForce;
 
     private bool _isExplode = false;
+    private bool _isDead = false;
     private float _explosionForce = 10.0f;
     private float _explosionRadius = 30.0f;
     private Vector3 _flyDir;
@@ -29,7 +30,7 @@ public class Barrel : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if (_isDamaged && _isExplode == false)
+        if (_isDamaged && _isDead == false)
         {
             // 물리 프레임마다 ForceMode.Impulse로 순간 힘을 가함
             _rb.AddForceAtPosition(_pendingForce, _pendingPoint, ForceMode.Impulse);  // :contentReference[oaicite:2]{index=2}
@@ -60,6 +61,7 @@ public class Barrel : MonoBehaviour
     }
     private void Explode()
     {
+        if (_isDead == true) return;
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, _explosionRadius, _damageMask);
         _isExplode = true;
         ParticlePoolManager.Instance.Spawn("Explosion", this.gameObject.transform.position);
@@ -71,7 +73,7 @@ public class Barrel : MonoBehaviour
             {
                 Enemy enemy = hit.gameObject.GetComponent<Enemy>();
                 Damage damage;
-                damage.Value = 10;
+                damage.Value = 30;
                 damage.From = this.gameObject;
                 enemy.TakeDamage(damage);
             }
@@ -79,7 +81,7 @@ public class Barrel : MonoBehaviour
             {
                 Player player = hit.gameObject.GetComponent<Player>();
                 Damage damage;
-                damage.Value = 10;
+                damage.Value = 30;
                 damage.From = this.gameObject;
                 player.TakeDamage(damage);
             }
@@ -88,6 +90,7 @@ public class Barrel : MonoBehaviour
     }
     IEnumerator Death()
     {
+        _isDead = true;
         int rand = Random.Range(3, 8);
         yield return new WaitForSeconds(rand);
 

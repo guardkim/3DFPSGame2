@@ -21,9 +21,10 @@ public class Enemy : MonoBehaviour
     public float FindDistance = 7.0f;
     public float AttackDistance = 2.0f;
     public float MoveSpeed = 3.3f;
-    public int Health = 100;
+    public int Health = 30;
     public float AttackCooltime = 2.0f;
-    public float DamagedTime = 0.5f;
+    public float DamagedTime = 0.1f;
+    public EEnemyType EnemyType = EEnemyType.Patrol;
 
     private float _damagedTimer = 0.0f;
     private float _attackTimer = 0.0f;
@@ -51,34 +52,47 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
-        switch (CurrentState)
+        if(EnemyType == EEnemyType.Patrol)
         {
-            case EnemyState.Idle:
+            switch (CurrentState)
             {
-                Idle();
-                break;
-            }
-            case EnemyState.Trace:
-            {
-                Trace();
-                break;
-            }
-            case EnemyState.Return:
-            {
-                Return();
-                break;
-            }
-            case EnemyState.Attack:
-            {
-                Attack();
-                break;
-            }
-            case EnemyState.Patrol:
-            {
-                Patrol();
-                break;
+                case EnemyState.Idle:
+                    {
+                        Idle();
+                        break;
+                    }
+                case EnemyState.Trace:
+                    {
+                        Trace();
+                        break;
+                    }
+                case EnemyState.Return:
+                    {
+                        Return();
+                        break;
+                    }
+                case EnemyState.Attack:
+                    {
+                        Attack();
+                        break;
+                    }
+                case EnemyState.Patrol:
+                    {
+                        Patrol();
+                        break;
+                    }
             }
         }
+        if(EnemyType == EEnemyType.Trace)
+        {
+            TraceType();
+        }
+        
+    }
+    private void TraceType()
+    {
+        if (CurrentState == EnemyState.Die) return;
+        _agent.SetDestination(_player.transform.position);
     }
     private void CreatePatrolPoint()
     {

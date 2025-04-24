@@ -26,6 +26,7 @@ public class PlayerMove : MonoBehaviour
     private Vector3 _dir;
     private Vector3 _climbVelocity; // 클라이밍 이동 속도
     private Vector3 _currentClimbVelocity; // 스무딩을 위한 현재 클라이밍 속도
+    private Vector3 _moveDir; // 이동 방향 보존
 
     // 입력 저장 변수
     private float _horizontalInput;
@@ -208,9 +209,40 @@ public class PlayerMove : MonoBehaviour
     private void CalculateMovementDirection()
     {
         _dir = new Vector3(_horizontalInput, 0, _verticalInput);
-        _dir = _dir.normalized;
-        _dir = Camera.main.transform.TransformDirection(_dir);
-
+        
+        if (_dir.magnitude > 0.1f)
+        {
+            _dir = _dir.normalized;
+            
+            // 카메라 타입에 따라 다른 이동 방향 계산
+            if (CameraManager.Instance != null && CameraManager.Instance.CameraType == CameraType.ISO)
+            {
+                Transform camT = Camera.main.transform;
+                Vector3 camForward = camT.forward;
+                camForward.y = 0f;
+                camForward.Normalize();
+                Vector3 camRight = camT.right;
+                camRight.y = 0f;
+                camRight.Normalize();
+                _moveDir = camForward * _verticalInput + camRight * _horizontalInput;
+            }
+            else
+            {
+                // FPS/TPS 모드에서는 카메라 기준으로 이동
+                _moveDir = Camera.main.transform.TransformDirection(_dir);
+                _moveDir.y = 0;
+                _moveDir.Normalize();
+            }
+        }
+        else
+        {
+            // 입력이 없는 경우 이전 방향 유지
+            _moveDir = Vector3.zero;
+        }
+        
+        // 최종 이동 방향 설정
+        _dir = _moveDir;
+        
         // 중력 적용
         _yVelocity += GRAVITY * Time.deltaTime;
         
@@ -290,7 +322,26 @@ public class PlayerMove : MonoBehaviour
     private IEnumerator Roll()
     {
         float elapsed = 0f;
-        _dir = Camera.main.transform.forward;
+        
+        // 카메라 타입에 따라 구르기 방향 설정
+        if (CameraManager.Instance != null && CameraManager.Instance.CameraType == CameraType.ISO)
+        {
+            // ISO 모드에서는 입력 방향으로 구르기
+            if (_moveDir.magnitude > 0.1f)
+            {
+                _dir = _moveDir;
+            }
+            else
+            {
+                // 입력이 없으면 현재 플레이어가 바라보는 방향으로
+                _dir = transform.forward;
+            }
+        }
+        else
+        {
+            // FPS/TPS 모드에서는 카메라 방향으로 구르기
+            _dir = Camera.main.transform.forward;
+        }
 
         while (elapsed < PlayerStat.RollDuration)
         {

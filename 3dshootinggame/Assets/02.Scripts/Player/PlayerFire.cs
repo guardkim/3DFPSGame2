@@ -120,6 +120,7 @@ public class PlayerFire : MonoBehaviour
         
         if (isHit) 
         {
+            if (hitInfo.collider.gameObject == this.gameObject) return;
             BulletEffect.transform.position = hitInfo.point;
             BulletEffect.transform.forward = hitInfo.normal;
             BulletEffect.Play();
@@ -134,6 +135,15 @@ public class PlayerFire : MonoBehaviour
                 damage.Value = 10;
                 damage.From = this.gameObject;
                 enemy.TakeDamage(damage);
+            }
+            if (hitInfo.collider.gameObject.CompareTag("Explosive"))
+            {
+                Barrel barrel = hitInfo.collider.gameObject.GetComponent<Barrel>();
+                Damage damage;
+                damage.Value = 10;
+                damage.From = this.gameObject;
+                Vector3 dir = hitInfo.point - damage.From.transform.position;
+                barrel.TakeDamage(hitInfo.point, dir, damage);
             }
         }
         else

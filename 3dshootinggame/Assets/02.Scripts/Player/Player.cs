@@ -6,6 +6,8 @@ public class Player : MonoBehaviour, IDamageable
     public float PlayerHP = 300.0f;
     private float _maxHP = 300.0f;
     public Slider HPBar;
+    public GameObject Gun;
+    public GameObject Sword;
     void Start()
     {
         _maxHP = PlayerHP;
@@ -13,7 +15,16 @@ public class Player : MonoBehaviour, IDamageable
 
     void Update()
     {
-        
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            Gun.SetActive(true);
+            Sword.SetActive(false);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            Gun.SetActive(false);
+            Sword.SetActive(true);
+        }
     }
     public void TakeDamage(Damage damage)
     {

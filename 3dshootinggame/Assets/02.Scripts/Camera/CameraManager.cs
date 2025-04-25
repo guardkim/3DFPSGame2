@@ -17,6 +17,7 @@ public class CameraManager : Singleton<CameraManager>
     public float ISOCameraDistance = -15f;  // ISO 카메라 거리 (- 값은 플레이어 뒤)
     public float ISOCameraAngle = 45f;      // ISO 카메라 각도 (X 축 회전)
     public GameObject GunPrefab;
+    public GameObject SwordPrefab;
     public Transform FPSGunPosition;
     public Transform TPSISOGunPosition;
     
@@ -99,6 +100,10 @@ public class CameraManager : Singleton<CameraManager>
             GunPrefab.transform.parent = FPSGunPosition;
             GunPrefab.transform.localPosition = new Vector3(0, 0, 0);
             GunPrefab.transform.localRotation = Quaternion.identity;
+
+            SwordPrefab.transform.parent = FPSGunPosition;
+            SwordPrefab.transform.localPosition = new Vector3(0, 0, 0);
+            SwordPrefab.transform.localRotation = Quaternion.identity;
         }
         if(Input.GetKeyDown(KeyCode.Alpha9))
         { 
@@ -108,6 +113,10 @@ public class CameraManager : Singleton<CameraManager>
             GunPrefab.transform.localPosition = new Vector3(0, 0, 0);
             GunPrefab.transform.localRotation = Quaternion.identity;
 
+            SwordPrefab.transform.parent = TPSISOGunPosition;
+            SwordPrefab.transform.localPosition = new Vector3(0, 0, 0);
+            SwordPrefab.transform.localRotation = Quaternion.identity;
+
         }
         if (Input.GetKeyDown(KeyCode.Alpha0))
         { 
@@ -116,6 +125,9 @@ public class CameraManager : Singleton<CameraManager>
             GunPrefab.transform.parent = TPSISOGunPosition;
             GunPrefab.transform.localPosition = new Vector3(0, 0, 0);
             GunPrefab.transform.localRotation = Quaternion.identity;
+            SwordPrefab.transform.parent = TPSISOGunPosition;
+            SwordPrefab.transform.localPosition = new Vector3(0, 0, 0);
+            SwordPrefab.transform.localRotation = Quaternion.identity;
         }
 
         // 카메라 타입이 변경되었다면

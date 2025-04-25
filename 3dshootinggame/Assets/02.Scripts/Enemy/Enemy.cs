@@ -21,9 +21,12 @@ public class Enemy : MonoBehaviour, IDamageable
     public float AttackDistance = 2.0f;
     public float MoveSpeed = 3.3f;
     public int Health = 30;
+    public int MaxHealth = 30;
     public float AttackCooltime = 2.0f;
     public float DamagedTime = 0.1f;
     public EEnemyType EnemyType = EEnemyType.Patrol;
+    public UI_EnemyHPBar HPBar;
+    public float Damage = 10.0f;
 
     private float _damagedTimer = 0.0f;
     private float _attackTimer = 0.0f;
@@ -39,6 +42,7 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void Start()
     {
+        MaxHealth = Health;
         _agent = GetComponent<NavMeshAgent>();
         _agent.speed = MoveSpeed;
 
@@ -51,8 +55,6 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void Update()
     {
-        if(EnemyType == EEnemyType.Patrol)
-        {
             switch (CurrentState)
             {
                 case EnemyState.Idle:
@@ -81,16 +83,10 @@ public class Enemy : MonoBehaviour, IDamageable
                         break;
                     }
             }
-        }
-        if(EnemyType == EEnemyType.Trace)
-        {
-            TraceType();
-        }
-        
     }
     private void TraceType()
     {
-        if (CurrentState == EnemyState.Die) return;
+        if (CurrentState != EnemyState.Trace) return;
         _agent.SetDestination(_player.transform.position);
     }
     private void CreatePatrolPoint()
@@ -142,7 +138,8 @@ public class Enemy : MonoBehaviour, IDamageable
     }
     public void Patrol()
     {
-        if (Vector3.Distance(transform.position, _player.transform.position) < FindDistance)
+        if (Vector3.Distance(transform.position, _player.transform.position) < FindDistance ||
+            EnemyType == EEnemyType.Trace)
         {
             Debug.Log("상태 전환 : Patrol -> Trace");
             CurrentState = EnemyState.Trace;
@@ -157,6 +154,9 @@ public class Enemy : MonoBehaviour, IDamageable
         }
 
         Health -= damage.Value;
+        
+        HPBar.RefreshHPBar((float)Health / (float)MaxHealth);
+        Debug.Log($"EnemyHealth : {(float)Health / (float)MaxHealth}");
         Knockback(10.0f, damage.From);
         if (Health <= 0)
         {
@@ -180,7 +180,8 @@ public class Enemy : MonoBehaviour, IDamageable
     private void Idle()
     {
         // 행동 : 가만히 있는다
-        if(Vector3.Distance(transform.position, _player.transform.position) < FindDistance)
+        if(Vector3.Distance(transform.position, _player.transform.position) < FindDistance ||
+            EnemyType == EEnemyType.Trace)
         {
             Debug.Log("상태 전환 : Idle -> Trace");
             CurrentState = EnemyState.Trace;
@@ -202,6 +203,7 @@ public class Enemy : MonoBehaviour, IDamageable
         if (Vector3.Distance(transform.position, _player.transform.position) >= FindDistance)
         {
             Debug.Log("상태 전환 : Trace -> Return");
+            if (CurrentState == EnemyState.Trace) return;
             CurrentState = EnemyState.Return;
         }
         if (Vector3.Distance(transform.position, _player.transform.position) < AttackDistance)
@@ -248,6 +250,10 @@ public class Enemy : MonoBehaviour, IDamageable
         if(_attackTimer >= AttackCooltime)
         {
             Debug.Log("플레이어 공격");
+            Player player = _player.GetComponent<Player>();
+            Damage damage = default;
+            damage.Value = (int)Damage;
+            player.TakeDamage(damage);
             _attackTimer = 0.0f;
         }
     }

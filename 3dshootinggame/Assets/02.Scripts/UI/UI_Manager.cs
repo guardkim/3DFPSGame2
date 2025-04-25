@@ -1,20 +1,23 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_Manager : MonoBehaviour
+public class UI_Manager : Singleton<UI_Manager>
 {
-    public static UI_Manager Instance;
-
     public TextMeshProUGUI CurrentBoomCount;
     public TextMeshProUGUI ReloadText;
     public TextMeshProUGUI CurrentBulletCount;
+    public UI_BloodScreen BloodScreen;
     public Slider ReloadProgressbar;
 
     public bool IsReloading = false;
     private float _reloadTime = 2.0f;
     private float _elapsedTime = 0.0f;
 
+    public void BloodFade()
+    {
+        StartCoroutine(BloodScreen.BloodFade());
+    }
     public void AddBoom()
     {
         int count = GetBoomCount();
@@ -59,7 +62,7 @@ public class UI_Manager : MonoBehaviour
 
     private void Update()
     {
-        if(IsReloading == true)
+        if (IsReloading == true)
         {
             if (_elapsedTime < _reloadTime)
             {
@@ -77,19 +80,6 @@ public class UI_Manager : MonoBehaviour
                 _elapsedTime = 0.0f;
                 ReloadCount();
             }
-        }
-    }
-
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
         }
     }
 }

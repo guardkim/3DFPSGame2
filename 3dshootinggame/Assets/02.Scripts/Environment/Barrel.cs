@@ -10,6 +10,7 @@ public class Barrel : MonoBehaviour, IDamageable
 
     public float BarrelHP = 30.0f;
     public int Damage = 30;
+    public float ExplosionRadius = 30.0f;
     private Rigidbody _rb;
     private bool _isDamaged = false;
     private Vector3 _pendingPoint;
@@ -18,7 +19,6 @@ public class Barrel : MonoBehaviour, IDamageable
     private bool _isExplode = false;
     private bool _isDead = false;
     private float _explosionForce = 10.0f;
-    private float _explosionRadius = 30.0f;
     private Vector3 _flyDir;
     private LayerMask _damageMask;
 
@@ -41,7 +41,7 @@ public class Barrel : MonoBehaviour, IDamageable
         }
         if(_isExplode)
         {
-            _rb.AddExplosionForce(_explosionForce, transform.position, _explosionRadius);
+            _rb.AddExplosionForce(_explosionForce, transform.position, ExplosionRadius);
             _rb.AddForce(_flyDir * _explosionForce, ForceMode.Impulse);
             _isExplode = false;
         }
@@ -63,7 +63,7 @@ public class Barrel : MonoBehaviour, IDamageable
     private void Explode()
     {
         if (_isDead == true) return;
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _explosionRadius, _damageMask);
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, ExplosionRadius, _damageMask);
         _isExplode = true;
         _isDead = true;
         ParticlePoolManager.Instance.Spawn("Explosion", this.gameObject.transform.position);

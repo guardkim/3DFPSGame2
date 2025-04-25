@@ -16,6 +16,9 @@ public class CameraManager : Singleton<CameraManager>
     public float ISOCameraHeight = 15f;     // ISO 카메라 높이
     public float ISOCameraDistance = -15f;  // ISO 카메라 거리 (- 값은 플레이어 뒤)
     public float ISOCameraAngle = 45f;      // ISO 카메라 각도 (X 축 회전)
+    public GameObject GunPrefab;
+    public Transform FPSGunPosition;
+    public Transform TPSISOGunPosition;
     
     private CameraType _prevCameraType;
     private CameraFollow _cameraFollow;
@@ -93,18 +96,28 @@ public class CameraManager : Singleton<CameraManager>
         { 
             newType = CameraType.FPS;
             typeChanged = true;
+            GunPrefab.transform.parent = FPSGunPosition;
+            GunPrefab.transform.localPosition = new Vector3(0, 0, 0);
+            GunPrefab.transform.localRotation = Quaternion.identity;
         }
         if(Input.GetKeyDown(KeyCode.Alpha9))
         { 
             newType = CameraType.TPS;
             typeChanged = true;
+            GunPrefab.transform.parent = TPSISOGunPosition;
+            GunPrefab.transform.localPosition = new Vector3(0, 0, 0);
+            GunPrefab.transform.localRotation = Quaternion.identity;
+
         }
-        if(Input.GetKeyDown(KeyCode.Alpha0))
+        if (Input.GetKeyDown(KeyCode.Alpha0))
         { 
             newType = CameraType.ISO;
             typeChanged = true;
+            GunPrefab.transform.parent = TPSISOGunPosition;
+            GunPrefab.transform.localPosition = new Vector3(0, 0, 0);
+            GunPrefab.transform.localRotation = Quaternion.identity;
         }
-        
+
         // 카메라 타입이 변경되었다면
         if (typeChanged && _prevCameraType != newType)
         {

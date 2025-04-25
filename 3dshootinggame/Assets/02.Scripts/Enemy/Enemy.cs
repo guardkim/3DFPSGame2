@@ -4,19 +4,18 @@ using TMPro;
 using TreeEditor;
 using UnityEngine;
 using UnityEngine.AI;
-
-public class Enemy : MonoBehaviour
+public enum EnemyState
 {
-    public enum EnemyState
-    {
-        Idle    = 0,
-        Trace   = 1,
-        Return  = 2,
-        Attack  = 3,
-        Damaged = 4,
-        Die     = 5,
-        Patrol  = 6
-    }
+    Idle = 0,
+    Trace = 1,
+    Return = 2,
+    Attack = 3,
+    Damaged = 4,
+    Die = 5,
+    Patrol = 6
+}
+public class Enemy : MonoBehaviour, IDamageable
+{
     public EnemyState CurrentState = EnemyState.Idle;
     public float FindDistance = 7.0f;
     public float AttackDistance = 2.0f;

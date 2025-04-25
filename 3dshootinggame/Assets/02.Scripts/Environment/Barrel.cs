@@ -2,13 +2,14 @@
 using UnityEditor.PackageManager;
 using UnityEngine;
 
-public class Barrel : MonoBehaviour
+public class Barrel : MonoBehaviour, IDamageable
 {
     // TakeDamage 당하면 체력 감소 + 체력이 다하면 폭발 이펙트,
     // 폭발 시 주위 적 & 플레이어에게 데미지
     // 폭발하면 랜덤하게 날라가고 n초 후에 사라짐.
 
     public float BarrelHP = 30.0f;
+    public int Damage = 30;
     private Rigidbody _rb;
     private bool _isDamaged = false;
     private Vector3 _pendingPoint;
@@ -26,7 +27,7 @@ public class Barrel : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
-        _damageMask = LayerMask.GetMask("Enemy", "Player");
+        _damageMask = LayerMask.GetMask("Enemy", "Player", "Barrel");
     }
     private void FixedUpdate()
     {
@@ -45,7 +46,7 @@ public class Barrel : MonoBehaviour
             _isExplode = false;
         }
     }
-    public void TakeDamage(Vector3 hitPoint, Vector3 hitDir, Damage damage)
+    public void TakeDamage(Damage damage)
     {
         BarrelHP -= damage.Value;
         if (BarrelHP <= 0.0f)
@@ -54,8 +55,8 @@ public class Barrel : MonoBehaviour
         }
         else
         {
-            _pendingPoint = hitPoint;
-            _pendingForce = hitDir.normalized;
+            _pendingPoint = damage.hitPoint;
+            _pendingForce = damage.hitDir.normalized;
             _isDamaged = true;
         }
     }
@@ -64,33 +65,35 @@ public class Barrel : MonoBehaviour
         if (_isDead == true) return;
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, _explosionRadius, _damageMask);
         _isExplode = true;
+        _isDead = true;
         ParticlePoolManager.Instance.Spawn("Explosion", this.gameObject.transform.position);
         FlyAway();
         foreach (Collider hit in hitColliders)
         {
-            Debug.Log($"{hit.gameObject}");
-            if (hit.gameObject.CompareTag("Enemy"))
+            IDamageable damageable = hit.GetComponent<IDamageable>();
+            if (hit.TryGetComponent<IDamageable>(out damageable))
             {
-                Enemy enemy = hit.gameObject.GetComponent<Enemy>();
-                Damage damage;
-                damage.Value = 30;
+                Damage damage = default;
+                damage.Value = Damage;
                 damage.From = this.gameObject;
-                enemy.TakeDamage(damage);
-            }
-            if (hit.gameObject.CompareTag("Player"))
-            {
-                Player player = hit.gameObject.GetComponent<Player>();
-                Damage damage;
-                damage.Value = 30;
-                damage.From = this.gameObject;
-                player.TakeDamage(damage);
+                damageable.TakeDamage(damage);
             }
         }
+        //LayerMask layer = LayerMask.NameToLayer("Barrel");
+        //Collider[] barrels = Physics.OverlapSphere(transform.position, _explosionRadius, layer);
+
+        //foreach (Collider barrel in barrels)
+        //{
+        //    if (barrel.TryGetComponent(out Barrel _barrel))
+        //    {
+        //        Debug.Log("barrel hits barrel");
+        //        _barrel.Explode();
+        //    }
+        //}
         StartCoroutine(Death());
     }
     IEnumerator Death()
     {
-        _isDead = true;
         int rand = Random.Range(3, 8);
         yield return new WaitForSeconds(rand);
 

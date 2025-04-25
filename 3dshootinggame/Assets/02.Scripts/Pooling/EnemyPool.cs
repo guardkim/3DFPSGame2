@@ -41,6 +41,8 @@ public class EnemyPool : Singleton<EnemyPool>
                 offset.y = 1.0f;
                 offset.z = Random.Range(0.0f, 5.0f);
                 enemy.transform.position = position + offset;
+                enemy.EnemyType = enemyType;
+                enemy.CurrentState = EnemyState.Idle;
                 enemy.gameObject.SetActive(true);
 
                 return enemy;

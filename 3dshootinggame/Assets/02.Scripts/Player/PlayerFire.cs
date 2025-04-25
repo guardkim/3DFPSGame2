@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 
 public class PlayerFire : MonoBehaviour
 {
@@ -127,23 +128,15 @@ public class PlayerFire : MonoBehaviour
             Vector3 bulletdir = hitInfo.point - BulletFirePosition.transform.position;
             BulletTrailPool.Instance.Fire(BulletFirePosition.transform.position, bulletdir);
 
-
-            if (hitInfo.collider.gameObject.CompareTag("Enemy"))
+            IDamageable damageable = hitInfo.collider.GetComponent<IDamageable>();
+            if (hitInfo.collider.TryGetComponent<IDamageable>(out damageable))
             {
-                Enemy enemy = hitInfo.collider.gameObject.GetComponent<Enemy>();
                 Damage damage;
                 damage.Value = 10;
                 damage.From = this.gameObject;
-                enemy.TakeDamage(damage);
-            }
-            if (hitInfo.collider.gameObject.CompareTag("Explosive"))
-            {
-                Barrel barrel = hitInfo.collider.gameObject.GetComponent<Barrel>();
-                Damage damage;
-                damage.Value = 10;
-                damage.From = this.gameObject;
-                Vector3 dir = hitInfo.point - damage.From.transform.position;
-                barrel.TakeDamage(hitInfo.point, dir, damage);
+                damage.hitPoint = hitInfo.point;
+                damage.hitDir = hitInfo.point - damage.From.transform.position;
+                damageable.TakeDamage(damage);
             }
         }
         else
@@ -168,13 +161,15 @@ public class PlayerFire : MonoBehaviour
             BulletEffect.transform.forward = hitInfo.normal;
             BulletEffect.Play();
 
-            if(hitInfo.collider.gameObject.CompareTag("Enemy"))
+            IDamageable damageable = hitInfo.collider.GetComponent<IDamageable>();
+            if (hitInfo.collider.TryGetComponent<IDamageable>(out damageable))
             {
-                Enemy enemy = hitInfo.collider.gameObject.GetComponent<Enemy>();
                 Damage damage;
                 damage.Value = 10;
                 damage.From = this.gameObject;
-                enemy.TakeDamage(damage);
+                damage.hitPoint = hitInfo.point;
+                damage.hitDir = hitInfo.point - damage.From.transform.position;
+                damageable.TakeDamage(damage);
             }
         }
     }

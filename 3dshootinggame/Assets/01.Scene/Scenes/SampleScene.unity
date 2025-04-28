@@ -483,6 +483,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 166098201}
   m_CullTransparentMesh: 1
+--- !u!4 &190350942 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400062, guid: fcb334eb247ae3e488abb081c847cf09, type: 3}
+  m_PrefabInstance: {fileID: 803352194}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &226338440
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1398,10 +1403,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 2718692034933505177, guid: 9620196a5d390a64dbda2551f225ae81, type: 3}
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 2320056261979505935, guid: 9620196a5d390a64dbda2551f225ae81, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2109676466}
+    m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1252462557264303137, guid: 9620196a5d390a64dbda2551f225ae81, type: 3}
       insertIndex: -1
@@ -1643,7 +1645,7 @@ MonoBehaviour:
   GunPrefab: {fileID: 1410730414}
   SwordPrefab: {fileID: 1423502363}
   FPSGunPosition: {fileID: 1606626683}
-  TPSISOGunPosition: {fileID: 2109676466}
+  TPSISOGunPosition: {fileID: 811116478}
 --- !u!1 &352939456
 GameObject:
   m_ObjectHideFlags: 0
@@ -2799,6 +2801,10 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 77b211478558177429d38798e40b649c, type: 2}
+    - target: {fileID: 9500000, guid: fcb334eb247ae3e488abb081c847cf09, type: 3}
+      propertyPath: m_WarningMessage
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -2817,6 +2823,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 400060, guid: fcb334eb247ae3e488abb081c847cf09, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1028523928}
+    - targetCorrespondingSourceObject: {fileID: 400062, guid: fcb334eb247ae3e488abb081c847cf09, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 811116478}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 100060, guid: fcb334eb247ae3e488abb081c847cf09, type: 3}
       insertIndex: -1
@@ -2857,6 +2866,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerHP: 300
+  _maxHP: 300
   HPBar: {fileID: 1334787952}
   Gun: {fileID: 1410730414}
   Sword: {fileID: 1423502363}
@@ -2933,6 +2943,37 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!1 &811116477
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 811116478}
+  m_Layer: 0
+  m_Name: TPSISOGunPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &811116478
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 811116477}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0.242, y: -0.13900018, z: 0.9900001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 190350942}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &829939261
 GameObject:
   m_ObjectHideFlags: 0
@@ -4369,11 +4410,6 @@ RectTransform:
   m_AnchoredPosition: {x: -5, y: 0}
   m_SizeDelta: {x: -20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!4 &1501254462 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2320056261979505935, guid: 9620196a5d390a64dbda2551f225ae81, type: 3}
-  m_PrefabInstance: {fileID: 226338440}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1506685381 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8167282835584471780, guid: d6e0d472a7d199945adee383b66c9902, type: 3}
@@ -4870,6 +4906,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerHP: 300
+  _maxHP: 300
   HPBar: {fileID: 1334787952}
   Gun: {fileID: 1410730414}
   Sword: {fileID: 1423502363}
@@ -6005,37 +6042,6 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!1 &2109676465
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2109676466}
-  m_Layer: 0
-  m_Name: TPSISOGunPosition
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2109676466
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109676465}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.12, y: 0.99, z: 0.139}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1501254462}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2136479238
 GameObject:
   m_ObjectHideFlags: 0

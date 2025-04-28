@@ -38,11 +38,12 @@ public class PlayerMove : MonoBehaviour
     // 컴포넌트 캐싱
     private Animator _ani;
     private CharacterController _characterController;
-
+    private Player _player;
     private void Awake()
     {
-        _ani = GetComponent<Animator>();
+        _ani = GetComponentInChildren<Animator>();
         _characterController = GetComponent<CharacterController>();
+        _player = GetComponent<Player>();
     }
 
     void Update()
@@ -83,8 +84,8 @@ public class PlayerMove : MonoBehaviour
     #region 입력 처리
     private void GetInputs()
     {
-        _horizontalInput = Input.GetAxisRaw("Horizontal");
-        _verticalInput = Input.GetAxisRaw("Vertical");
+        _horizontalInput = Input.GetAxis("Horizontal");
+        _verticalInput = Input.GetAxis("Vertical");
         
         // 점프 입력 감지
         if (Input.GetKeyDown(KeyCode.Space))
@@ -100,6 +101,7 @@ public class PlayerMove : MonoBehaviour
         {
             _rollKeyPressed = true;
         }
+
     }
 
     private void UpdateAnimations()
@@ -208,11 +210,13 @@ public class PlayerMove : MonoBehaviour
     private void CalculateMovementDirection()
     {
         _dir = new Vector3(_horizontalInput, 0, _verticalInput);
-        
+        _ani.SetFloat("MoveAmount", _dir.magnitude);
+        _ani.SetLayerWeight(2, 1 - (_player.PlayerHP / _player._maxHP));
+
         if (_dir.magnitude > 0.1f)
         {
             _dir = _dir.normalized;
-            
+
             // 카메라 타입에 따라 다른 이동 방향 계산
             if (CameraManager.Instance != null && CameraManager.Instance.CameraType == CameraType.ISO)
             {

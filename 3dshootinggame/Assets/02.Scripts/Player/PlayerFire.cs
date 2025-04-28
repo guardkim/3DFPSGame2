@@ -30,7 +30,7 @@ public class PlayerFire : MonoBehaviour
 
     private void Awake()
     {
-        _ani = GetComponent<Animator>();
+        _ani = GetComponentInChildren<Animator>();
         _player = GetComponent<Player>();
         _damageMask = LayerMask.GetMask("Enemy","Barrel");
 
@@ -102,7 +102,7 @@ public class PlayerFire : MonoBehaviour
             if(_fireTimer <= 0.0f && _fireCurrentCount > 0)
             {
                 _fireCurrentCount--;
-                _ani.SetTrigger("SHOOT");
+                _ani.SetTrigger("Shoot");
                 
                 if (_isISOMode)
                 {

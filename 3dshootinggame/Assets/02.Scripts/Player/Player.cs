@@ -9,7 +9,7 @@ public enum PlayerMode
 public class Player : MonoBehaviour, IDamageable
 {
     public float PlayerHP = 300.0f;
-    private float _maxHP = 300.0f;
+    public float _maxHP = 300.0f;
     public Slider HPBar;
     public GameObject Gun;
     public GameObject Sword;

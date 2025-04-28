@@ -39,12 +39,13 @@ public class Enemy : MonoBehaviour, IDamageable
     private bool _isPatrol = false;
     private bool _isPatrolTurn = false;
     private NavMeshAgent _agent;
-
+    private Animator _animator;
     private void Start()
     {
         MaxHealth = Health;
         _agent = GetComponent<NavMeshAgent>();
         _agent.speed = MoveSpeed;
+        _animator = GetComponentInChildren<Animator>();
 
         _startPosition = transform.position;
         _player = GameObject.FindGameObjectWithTag("Player");
@@ -158,10 +159,12 @@ public class Enemy : MonoBehaviour, IDamageable
         HPBar.RefreshHPBar((float)Health / (float)MaxHealth);
         Debug.Log($"EnemyHealth : {(float)Health / (float)MaxHealth}");
         Knockback(10.0f, damage.From);
+        _animator.SetTrigger("Hit");
         if (Health <= 0)
         {
             Debug.Log($"상태 전환 : {CurrentState} -> Die");
             CurrentState = EnemyState.Die;
+            _animator.SetTrigger("Die");
             StartCoroutine(Die_Coroutine());
             return;
         }
@@ -184,6 +187,7 @@ public class Enemy : MonoBehaviour, IDamageable
             EnemyType == EEnemyType.Trace)
         {
             Debug.Log("상태 전환 : Idle -> Trace");
+            _animator.SetTrigger("IdleToMove");
             CurrentState = EnemyState.Trace;
         }
 
@@ -209,6 +213,7 @@ public class Enemy : MonoBehaviour, IDamageable
         if (Vector3.Distance(transform.position, _player.transform.position) < AttackDistance)
         {
             Debug.Log("상태 전환 : Trace -> Attack");
+            _animator.SetTrigger("MoveToAttackDelay");
             CurrentState = EnemyState.Attack;
         }
 
@@ -225,6 +230,7 @@ public class Enemy : MonoBehaviour, IDamageable
         {
             Debug.Log("상태 전환 : Return -> Idle");
             transform.position = _startPosition;
+            _animator.SetTrigger("MoveToIdle");
             CurrentState = EnemyState.Idle;
         }
         if (Vector3.Distance(transform.position, _player.transform.position) < FindDistance)
@@ -236,20 +242,22 @@ public class Enemy : MonoBehaviour, IDamageable
         //_characterController.Move(dir * MoveSpeed * Time.deltaTime);
         _agent.SetDestination(_startPosition);
     }
-    private void Attack()
+    public void Attack()
     {
         if (Vector3.Distance(transform.position, _player.transform.position) >= AttackDistance)
         {
             Debug.Log("상태 전환 : Attack -> Trace");
             CurrentState = EnemyState.Trace;
             _attackTimer = 0.0f;
+            _animator.SetTrigger("AttackDelayToMove");
             return;
         }
         
         _attackTimer += Time.deltaTime;
         if(_attackTimer >= AttackCooltime)
         {
-            Debug.Log("플레이어 공격");
+
+            _animator.SetTrigger("AttackDelayToAttack");
             Player player = _player.GetComponent<Player>();
             Damage damage = default;
             damage.Value = (int)Damage;

@@ -44,6 +44,8 @@ public class EnemyPool : Singleton<EnemyPool>
                 enemy.EnemyType = enemyType;
                 enemy.CurrentState = EnemyState.Idle;
                 enemy.gameObject.SetActive(true);
+                enemy.Health = enemy.MaxHealth;
+                enemy.HPBar.RefreshHPBar((float)enemy.Health / (float)enemy.MaxHealth);
 
                 return enemy;
             }

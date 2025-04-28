@@ -1,6 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
+public enum PlayerMode
+{
+    Gun = 0,
+    Sword = 1
+}
 public class Player : MonoBehaviour, IDamageable
 {
     public float PlayerHP = 300.0f;
@@ -8,6 +13,7 @@ public class Player : MonoBehaviour, IDamageable
     public Slider HPBar;
     public GameObject Gun;
     public GameObject Sword;
+    public PlayerMode CurrentMode = PlayerMode.Gun;
     void Start()
     {
         _maxHP = PlayerHP;
@@ -17,11 +23,13 @@ public class Player : MonoBehaviour, IDamageable
     {
         if(Input.GetKeyDown(KeyCode.Alpha1))
         {
+            CurrentMode = PlayerMode.Gun;
             Gun.SetActive(true);
             Sword.SetActive(false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
+            CurrentMode = PlayerMode.Sword;
             Gun.SetActive(false);
             Sword.SetActive(true);
         }

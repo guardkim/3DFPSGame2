@@ -20,6 +20,7 @@ public class CameraManager : Singleton<CameraManager>
     public GameObject SwordPrefab;
     public Transform FPSGunPosition;
     public Transform TPSISOGunPosition;
+    public GameObject PlayerMesh;
     
     private CameraType _prevCameraType;
     private CameraFollow _cameraFollow;
@@ -104,6 +105,8 @@ public class CameraManager : Singleton<CameraManager>
             SwordPrefab.transform.parent = FPSGunPosition;
             SwordPrefab.transform.localPosition = new Vector3(0, 0, 0);
             SwordPrefab.transform.localRotation = Quaternion.identity;
+
+            PlayerMesh.SetActive(false);
         }
         if(Input.GetKeyDown(KeyCode.Alpha9))
         { 
@@ -117,6 +120,8 @@ public class CameraManager : Singleton<CameraManager>
             SwordPrefab.transform.localPosition = new Vector3(0, 0, 0);
             SwordPrefab.transform.localRotation = Quaternion.identity;
 
+            PlayerMesh.SetActive(true);
+
         }
         if (Input.GetKeyDown(KeyCode.Alpha0))
         { 
@@ -128,6 +133,8 @@ public class CameraManager : Singleton<CameraManager>
             SwordPrefab.transform.parent = TPSISOGunPosition;
             SwordPrefab.transform.localPosition = new Vector3(0, 0, 0);
             SwordPrefab.transform.localRotation = Quaternion.identity;
+
+            PlayerMesh.SetActive(true);
         }
 
         // 카메라 타입이 변경되었다면

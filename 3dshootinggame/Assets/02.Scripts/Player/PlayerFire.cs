@@ -126,6 +126,8 @@ public class PlayerFire : MonoBehaviour
 
             Vector3 forward = transform.forward;
             float cosThreshold = Mathf.Cos(Mathf.Deg2Rad * _angle / 0.5f);
+            _ani.SetTrigger("SwordAttack");
+
             for (int i = 0; i < count; i++)
             {
                 Transform target = hitColliders[i].transform;
@@ -188,7 +190,9 @@ public class PlayerFire : MonoBehaviour
             BulletTrailPool.Instance.Fire(BulletFirePosition.transform.position, Camera.main.transform.forward);
         }
     }
-    
+
+
+
     private void FireBulletISO()
     {
         // ISO 모드에서는 조정된 방향으로 발사

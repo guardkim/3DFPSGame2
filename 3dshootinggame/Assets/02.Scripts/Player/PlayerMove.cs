@@ -45,9 +45,10 @@ public class PlayerMove : MonoBehaviour
         _characterController = GetComponent<CharacterController>();
         _player = GetComponent<Player>();
     }
-
+    
     void Update()
     {
+        Debug.Log($"{_ani}");
         // 키 입력 처리
         GetInputs();
         UpdateAnimations();
@@ -106,8 +107,8 @@ public class PlayerMove : MonoBehaviour
 
     private void UpdateAnimations()
     {
-        _ani.SetBool("IsMove", _horizontalInput != 0 || _verticalInput != 0);
-        _ani.SetBool("IsRun", _runKeyPressed);
+        //_ani.SetBool("IsMove", _horizontalInput != 0 || _verticalInput != 0);
+        //_ani.SetBool("IsRun", _runKeyPressed);
     }
     #endregion
 

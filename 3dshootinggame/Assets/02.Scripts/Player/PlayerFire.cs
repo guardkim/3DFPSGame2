@@ -17,7 +17,6 @@ public class PlayerFire : MonoBehaviour
     private int _currentBoomCount = 3;
     private int _fireCurrentCount = 50;
     private Player _player;
-
     private Animator _ani;
     
     // ISO 모드에서 사용하는 발사 방향
@@ -27,6 +26,7 @@ public class PlayerFire : MonoBehaviour
     private float _radius = 5f;
     private float _angle = 90f;
     private int _damage = 20;
+    private bool _isZoom = false;
 
     private void Awake()
     {
@@ -64,9 +64,25 @@ public class PlayerFire : MonoBehaviour
         
         // 총 발사 처리
         ProcessGunFire();
-        
+
+        // 줌 처리
+        if (Input.GetMouseButtonDown(1))
+        {
+            if (_player.CurrentMode != PlayerMode.Gun) return;
+            if (CameraManager.Instance.CameraType != CameraType.FPS) return;
+            _isZoom = !_isZoom;
+            if (_isZoom)
+            {
+                UI_Manager.Instance.ZoomIn();
+            }
+            else
+            {
+                
+                UI_Manager.Instance.ZoomOut();
+            }
+        }
         // 재장전 처리
-        if(Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R))
         {
             if (_fireCurrentCount < FireMaxCount)
             {
@@ -78,14 +94,14 @@ public class PlayerFire : MonoBehaviour
     
     private void ProcessBombFire()
     {
-        if (Input.GetMouseButton(1))
+        if (Input.GetKey(KeyCode.G))
         {
             if (_currentBoomCount <= 0) return;
             _buttonDownTimer += Time.deltaTime;
             if (_buttonDownTimer >= 3.0f) _buttonDownTimer = 3.0f;
         }
-        
-        if(Input.GetMouseButtonUp(1))
+
+        if (Input.GetKeyUp(KeyCode.G))
         {
             if (_currentBoomCount <= 0) return;
             FireBoom();

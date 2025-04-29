@@ -20,6 +20,7 @@ public class CameraManager : Singleton<CameraManager>
     public GameObject SwordPrefab;
     public Transform FPSGunPosition;
     public Transform TPSISOGunPosition;
+    public Transform TPSISOSwordPosition;
     public GameObject PlayerMesh;
     
     private CameraType _prevCameraType;
@@ -116,7 +117,7 @@ public class CameraManager : Singleton<CameraManager>
             GunPrefab.transform.localPosition = new Vector3(0, 0, 0);
             GunPrefab.transform.localRotation = Quaternion.identity;
 
-            SwordPrefab.transform.parent = TPSISOGunPosition;
+            SwordPrefab.transform.parent = TPSISOSwordPosition;
             SwordPrefab.transform.localPosition = new Vector3(0, 0, 0);
             SwordPrefab.transform.localRotation = Quaternion.identity;
 
@@ -130,7 +131,7 @@ public class CameraManager : Singleton<CameraManager>
             GunPrefab.transform.parent = TPSISOGunPosition;
             GunPrefab.transform.localPosition = new Vector3(0, 0, 0);
             GunPrefab.transform.localRotation = Quaternion.identity;
-            SwordPrefab.transform.parent = TPSISOGunPosition;
+            SwordPrefab.transform.parent = TPSISOSwordPosition;
             SwordPrefab.transform.localPosition = new Vector3(0, 0, 0);
             SwordPrefab.transform.localRotation = Quaternion.identity;
 

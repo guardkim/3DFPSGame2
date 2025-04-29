@@ -9,10 +9,14 @@ public class UI_Manager : Singleton<UI_Manager>
     public TextMeshProUGUI CurrentBulletCount;
     public UI_BloodScreen BloodScreen;
     public Slider ReloadProgressbar;
+    public Image SniperZoom;
+    public Image Crosshair;
 
     public bool IsReloading = false;
     private float _reloadTime = 2.0f;
     private float _elapsedTime = 0.0f;
+    private float _zoomInSize = 15f;
+    private float _zoomOutSize = 60f;
 
     public void BloodFade()
     {
@@ -60,6 +64,18 @@ public class UI_Manager : Singleton<UI_Manager>
         IsReloading = true;
     }
 
+    public void ZoomIn()
+    {
+        SniperZoom.gameObject.SetActive(true);
+        Crosshair.gameObject.SetActive(false);
+        Camera.main.fieldOfView = _zoomInSize;
+    }
+    public void ZoomOut()
+    {
+        SniperZoom.gameObject.SetActive(false);
+        Crosshair.gameObject.SetActive(true);
+        Camera.main.fieldOfView = _zoomOutSize;
+    }
     private void Update()
     {
         if (IsReloading == true)

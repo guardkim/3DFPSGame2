@@ -85,8 +85,8 @@ public class PlayerMove : MonoBehaviour
     #region 입력 처리
     private void GetInputs()
     {
-        _horizontalInput = Input.GetAxis("Horizontal");
-        _verticalInput = Input.GetAxis("Vertical");
+        _horizontalInput = Input.GetAxisRaw("Horizontal");
+        _verticalInput = Input.GetAxisRaw("Vertical");
         
         // 점프 입력 감지
         if (Input.GetKeyDown(KeyCode.Space))

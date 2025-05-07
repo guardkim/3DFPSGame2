@@ -127,7 +127,7 @@ public class Enemy : MonoBehaviour, IDamageable
             // 순찰 위치로 이동 중인 경우
             else
             {
-                Debug.Log(Vector3.Distance(transform.position, _patrolPosition));
+                //Debug.Log(Vector3.Distance(transform.position, _patrolPosition));
 
                 if (Vector3.Distance(transform.position, _patrolPosition) < 0.1f)
                 {

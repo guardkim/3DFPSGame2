@@ -1,16 +1,20 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerSwordAttack : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public ParticleSystem ParticlePrefab;
+    private void Awake()
     {
-        
+        ParticlePrefab.Stop();
+    }
+    public void StartTrail()
+    {
+        ParticlePrefab.Clear();
+        ParticlePrefab.Play();
+    }
+    public void StopTrail()
+    {
+        ParticlePrefab.Stop();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

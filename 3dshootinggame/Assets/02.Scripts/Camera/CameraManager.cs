@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine;
 
 public enum CameraType
 {
@@ -29,6 +32,18 @@ public class CameraManager : Singleton<CameraManager>
     private Transform _playerTransform;
     private PlayerRotate _playerRotate;
     private GameObject _isoCamera; // ISO 카메라 타겟 (월드 공간에 고정)
+
+    [Header("카메라 쉐이크 설정")]
+    public float ShakeDuration = 0.5f;
+    public float ShakeAmount = 0.7f;
+    public float DecreaseFactor = 1.0f;
+
+    private float _currentShakeDuration = 0f;
+    private bool _isShaking = false;
+    private Vector3 _shakeOffset = Vector3.zero;
+    private Vector3 fpsOriginalPos;
+    private Vector3 tpsOriginalPos;
+    private Vector3 isoOriginalPos;
 
     void Start()
     {
@@ -87,6 +102,11 @@ public class CameraManager : Singleton<CameraManager>
         // 초기화
         IsTypeChanged = true;
         _cameraFollow.Init();
+
+        fpsOriginalPos = _cameraFollow.FPSTarget.localPosition;
+        tpsOriginalPos = _cameraFollow.TPSTarget.localPosition;
+        isoOriginalPos = _cameraFollow.ISOTarget.localPosition;
+
     }
 
     void Update()
@@ -272,5 +292,46 @@ public class CameraManager : Singleton<CameraManager>
                 _cameraFollow.TPSTarget = target.transform;
                 break;
         }
+    }
+    public void ShakeCamera(float duration, float amount)
+    {
+        StartCoroutine(ShakeCameraTargets(duration, amount));
+    }
+
+    private IEnumerator ShakeCameraTargets(float duration, float amount)
+    {
+        // 각 타겟의 원래 위치 저장
+        float elapsed = 0;
+
+        while (elapsed < duration)
+        {
+            // 랜덤 오프셋 계산
+            Vector3 shakeOffset = Random.insideUnitSphere * amount;
+
+            // 현재 활성화된 타겟에만 쉐이크 적용
+            switch (CameraType)
+            {
+                case CameraType.FPS:
+                    _cameraFollow.FPSTarget.localPosition = fpsOriginalPos + shakeOffset;
+                    break;
+                case CameraType.TPS:
+                    _cameraFollow.TPSTarget.localPosition = tpsOriginalPos + shakeOffset;
+                    break;
+                case CameraType.ISO:
+                    // ISO는 월드 공간에 있으므로 월드 포지션 사용
+                    _cameraFollow.ISOTarget.localPosition = isoOriginalPos + shakeOffset;
+                    //_isoCamera.transform.position += shakeOffset;
+                    break;
+            }
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // 원래 위치로 복원
+        _cameraFollow.FPSTarget.localPosition = fpsOriginalPos;
+        _cameraFollow.TPSTarget.localPosition = tpsOriginalPos;
+        _cameraFollow.ISOTarget.localPosition = isoOriginalPos;
+        // ISO 카메라는 UpdateISOCameraPosition()에서 자동으로 위치가 재설정됨
     }
 }

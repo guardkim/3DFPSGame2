@@ -126,9 +126,10 @@ public class CameraRotate : MonoBehaviour
         // ISO 모드에서는 카메라는 고정된 위치와 방향 유지, 플레이어만 마우스 방향 바라봄
         // 마우스 위치로부터 레이 생성
         _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        
+
         if (Physics.Raycast(_ray, out _hit, 100f, _groundLayer))
         {
+
             _targetPosition = _hit.point;
             
             // 플레이어가 마우스 포인터를 향해 회전 (XZ 평면에서만)
@@ -175,9 +176,11 @@ public class CameraRotate : MonoBehaviour
             Debug.DrawRay(PlayerTransform.position, _shootDirection * 10f, Color.red);
         }
         
+        Debug.Log($"PlayerTransform : {PlayerTransform.gameObject.name}, PlayerFire : {_playerFire}");
         // PlayerFire에 발사 방향 전달
         if (_playerFire != null)
         {
+            Debug.Log($"ShootDirection : {_shootDirection}");
             _playerFire.SetISOShootDirection(_shootDirection);
         }
     }

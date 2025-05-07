@@ -3,18 +3,13 @@ using UnityEngine;
 
 public class PlayerFire : MonoBehaviour
 {
-    public GameObject FirePosition;
-    public GameObject BombPrefab;
     public GameObject BulletFirePosition;
     public ParticleSystem BulletEffect;
 
-    public float ThrowPower = 15f;
     public float FireCoolTime = 0.1f;
     public int FireMaxCount = 50;
 
-    private float _buttonDownTimer = 0.0f;
     private float _fireTimer = 0.1f;
-    private int _currentBoomCount = 3;
     private int _fireCurrentCount = 50;
     private Player _player;
     private Animator _ani;
@@ -47,20 +42,12 @@ public class PlayerFire : MonoBehaviour
         _isoShootDirection = direction;
     }
     
-    private void FireBoom()
-    {
-        UI_Manager.Instance.RemoveBoom();
-        _currentBoomCount = UI_Manager.Instance.GetBoomCount();
-        BombPool.Instance.Create(FirePosition.transform.position, ThrowPower * _buttonDownTimer);
-    }
+
     
     private void Update()
     {
         // 현재 카메라 모드 확인
         _isISOMode = CameraManager.Instance.CameraType == CameraType.ISO;
-        
-        // 수류탄 발사 처리
-        ProcessBombFire();
         
         // 총 발사 처리
         ProcessGunFire();
@@ -92,22 +79,7 @@ public class PlayerFire : MonoBehaviour
         }
     }
     
-    private void ProcessBombFire()
-    {
-        if (Input.GetKey(KeyCode.G))
-        {
-            if (_currentBoomCount <= 0) return;
-            _buttonDownTimer += Time.deltaTime;
-            if (_buttonDownTimer >= 3.0f) _buttonDownTimer = 3.0f;
-        }
-
-        if (Input.GetKeyUp(KeyCode.G))
-        {
-            if (_currentBoomCount <= 0) return;
-            FireBoom();
-            _buttonDownTimer = 0.0f;
-        }
-    }
+    
     
     private void ProcessGunFire()
     {
@@ -135,31 +107,33 @@ public class PlayerFire : MonoBehaviour
                 _fireTimer = FireCoolTime;
             }
         }
-        if (Input.GetMouseButton(0) && _player.CurrentMode == PlayerMode.Sword)
+        if (Input.GetMouseButtonDown(0) && _player.CurrentMode == PlayerMode.Sword)
         {
-            Collider[] hitColliders = new Collider[10];
-            int count = Physics.OverlapSphereNonAlloc(transform.position, 3.0f, hitColliders, _damageMask);
-
-            Vector3 forward = transform.forward;
-            float cosThreshold = Mathf.Cos(Mathf.Deg2Rad * _angle / 0.5f);
+            Debug.Log("Press Left Click ");
             _ani.SetTrigger("SwordAttack");
+        }
+    }
+    public void SwordAttackTiming()
+    {
+        Collider[] hitColliders = new Collider[10];
+        int count = Physics.OverlapSphereNonAlloc(transform.position, 3.0f, hitColliders, _damageMask);
+        Vector3 forward = transform.forward;
+        float cosThreshold = Mathf.Cos(Mathf.Deg2Rad * _angle / 0.5f);
+        for (int i = 0; i < count; i++)
+        {
+            Transform target = hitColliders[i].transform;
+            Vector3 toTarget = (target.position - transform.position).normalized;
 
-            for (int i = 0; i < count; i++)
+            // 부채꼴(콘) 각도 체크
+            if (Vector3.Dot(forward, toTarget) >= cosThreshold)
             {
-                Transform target = hitColliders[i].transform;
-                Vector3 toTarget = (target.position - transform.position).normalized;
-
-                // 부채꼴(콘) 각도 체크
-                if (Vector3.Dot(forward, toTarget) >= cosThreshold)
+                Enemy enemy = hitColliders[i].GetComponent<Enemy>();
+                if (enemy != null)
                 {
-                    Enemy enemy = hitColliders[i].GetComponent<Enemy>();
-                    if (enemy != null)
-                    {
-                        Damage damage = default;
-                        damage.Value = 10;
-                        damage.From = this.gameObject;
-                        enemy.TakeDamage(damage);
-                    }
+                    Damage damage = default;
+                    damage.Value = 10;
+                    damage.From = this.gameObject;
+                    enemy.TakeDamage(damage);
                 }
             }
         }

@@ -1,21 +1,42 @@
+ï»¿using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class Bomb : MonoBehaviour
 {
-    // ¸ñÇ¥ : ¸¶¿ì½ºÀÇ ¿À¸¥ÂÊ ¹öÆ°À» ´©¸£¸é ½Ã¼±ÀÌ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î ¼ö·ùÅºÀ» ´øÁö°í ½Í´Ù.
+    // ëª©í‘œ : ë§ˆìš°ìŠ¤ì˜ ì˜¤ë¥¸ìª½ ë²„íŠ¼ì„ ëˆ„ë¥´ë©´ ì‹œì„ ì´ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ ìˆ˜ë¥˜íƒ„ì„ ë˜ì§€ê³  ì‹¶ë‹¤.
     public GameObject ExplosionEffectPrefab;
+    public SphereCollider Collider;
 
+    private bool _isBomb = false;
+
+    private void Awake()
+    {
+        Collider = GetComponent<SphereCollider>();
+        Collider.enabled = false;
+    }
     public void Fire(float force)
     {
         Rigidbody bombRigidbody = GetComponent<Rigidbody>();
         bombRigidbody.AddForce(Camera.main.transform.forward * force
             , ForceMode.Impulse);
         bombRigidbody.AddTorque(Vector3.one);
+        Collider.enabled = true;
     }
     private void OnCollisionEnter(Collision collision)
     {
         GameObject effectObject = Instantiate(ExplosionEffectPrefab);
         effectObject.transform.position = collision.contacts[0].point;
+        IDamageable damageable = collision.gameObject.GetComponent<IDamageable>();
+        if (collision.collider.TryGetComponent<IDamageable>(out damageable))
+        {
+            Damage damage = default;
+            damage.Value = 10;
+            damage.From = this.gameObject;
+            damageable.TakeDamage(damage);
+        }
+        CameraManager.Instance.ShakeCamera(1.0f, 1.0f);
+
+        Debug.Log($"{collision.gameObject.name} Hit!");
         gameObject.SetActive(false);
     }
 }

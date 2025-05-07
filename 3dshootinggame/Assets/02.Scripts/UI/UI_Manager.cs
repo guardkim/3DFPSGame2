@@ -11,6 +11,9 @@ public class UI_Manager : Singleton<UI_Manager>
     public Slider ReloadProgressbar;
     public Image SniperZoom;
     public Image Crosshair;
+    public Image GunIcon;
+    public Image SwordIcon;
+    public Image BombIcon;
 
     public bool IsReloading = false;
     private float _reloadTime = 2.0f;
@@ -18,6 +21,12 @@ public class UI_Manager : Singleton<UI_Manager>
     private float _zoomInSize = 15f;
     private float _zoomOutSize = 60f;
 
+    private void Start()
+    {
+        GunIcon.color = new Color(1, 1, 1, 1.0f);
+        SwordIcon.color = new Color(1, 1, 1, 0.2f);
+        BombIcon.color = new Color(1, 1, 1, 0.2f);
+    }
     public void BloodFade()
     {
         StartCoroutine(BloodScreen.BloodFade());
@@ -96,6 +105,27 @@ public class UI_Manager : Singleton<UI_Manager>
                 _elapsedTime = 0.0f;
                 ReloadCount();
             }
+        }
+    }
+    public void SelectWeapon(int number)
+    {
+        if (number == 0)
+        {
+            GunIcon.color = new Color(1, 1, 1, 1.0f);
+            SwordIcon.color = new Color(1, 1, 1, 0.2f);
+            BombIcon.color = new Color(1, 1, 1, 0.2f);
+        }
+        else if (number == 1)
+        {
+            GunIcon.color = new Color(1, 1, 1, 0.2f);
+            SwordIcon.color = new Color(1, 1, 1, 1.0f);
+            BombIcon.color = new Color(1, 1, 1, 0.2f); ;
+        }
+        else if (number == 2)
+        {
+            GunIcon.color = new Color(1, 1, 1, 0.2f);
+            SwordIcon.color = new Color(1, 1, 1, 0.2f);
+            BombIcon.color = new Color(1, 1, 1, 1.0f);
         }
     }
 }

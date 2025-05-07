@@ -1,4 +1,4 @@
-// Designed by KINEMATION, 2025.
+﻿// Designed by KINEMATION, 2025.
 
 using KINEMATION.ProceduralRecoilAnimationSystem.Runtime;
 using KINEMATION.FPSAnimationPack.Scripts.Sounds;

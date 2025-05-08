@@ -1,12 +1,15 @@
 ﻿using System.Collections;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public enum GameState
 {
     Ready,
     Play,
+    Pause,
     GameOver
 }
 
@@ -27,6 +30,7 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private float readyDuration = 3f; // 준비 시간(초)
     [SerializeField] private float gameOverDisplayDuration = 3f; // 게임오버 표시 시간(초)
 
+    public UI_OptionPopup optionPopup;
     // 게임이 시작될 때 호출
     void Start()
     {
@@ -44,8 +48,33 @@ public class GameManager : Singleton<GameManager>
         {
             RestartGame();
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        { 
+            // 게임 일시 정지
+            Pause();
+        }
+    }
+    public void Pause()
+    {
+        SetGameState(GameState.Pause);
+    }
+    public void Continue()
+    {
+        // 게임 재개
+        SetGameState(GameState.Play);
     }
 
+    public void Restart()
+    {
+        CurrentGameState = GameState.Ready;
+        Time.timeScale = 1;
+
+        Cursor.lockState = CursorLockMode.None;
+
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(currentSceneIndex);
+    }
     // 게임 상태 변경 메서드
     public void SetGameState(GameState newState)
     {
@@ -69,7 +98,9 @@ public class GameManager : Singleton<GameManager>
             case GameState.Play:
                 // Play 상태에서는 게임 시간 정상 진행
                 Time.timeScale = 1f;
-
+                if (CameraManager.Instance.CameraType != CameraType.ISO)
+                    Cursor.lockState = CursorLockMode.Locked;
+                optionPopup.Close();
                 // Play 이미지 표시
                 if (stateImage != null && playSprite != null)
                 {
@@ -88,6 +119,11 @@ public class GameManager : Singleton<GameManager>
                     stateImage.gameObject.SetActive(true);
                     stateImage.sprite = gameOverSprite;
                 }
+                break;
+            case GameState.Pause:
+                Time.timeScale = 0;
+                Cursor.lockState = CursorLockMode.None;
+                optionPopup.Open();
                 break;
         }
     }

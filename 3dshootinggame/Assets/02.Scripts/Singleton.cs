@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
 {
@@ -31,7 +31,7 @@ public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
         if (_instance == null)
         {
             _instance = this as T;
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject); // 씬이 바뀌어도 그 게임 오브젝트는 삭제하지 않겠다.
             Init();
         }
         else if(_instance != this)

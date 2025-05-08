@@ -37,7 +37,7 @@ public class PlayerBomb : MonoBehaviour
     }
     private void FireBomb()
     {
-        //UI_Manager.Instance.RemoveBoom();
+        UI_Manager.Instance.RemoveBoom();
         _currentBoomCount = UI_Manager.Instance.GetBoomCount();
         BombPool.Instance.Create(FirePosition.transform.position, ThrowPower * _buttonDownTimer);
 

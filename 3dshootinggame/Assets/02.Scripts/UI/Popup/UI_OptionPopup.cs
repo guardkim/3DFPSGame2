@@ -1,24 +1,18 @@
-﻿using UnityEngine;
+﻿using System.Security.Cryptography.X509Certificates;
+using UnityEngine;
 
-public class UI_OptionPopup : MonoBehaviour
+public class UI_OptionPopup : UI_Popup
 {
-    public UI_CreditPopup CreditPopup;
 
+    
     public void OnClickCreditButton()
     {
-        CreditPopup.Open();
+        PopupManager.Instance.Open(EPopupType.UI_CreditPopup);
     }
-    public void Open()
-    {
-        gameObject.SetActive(true);
-    }
-    public void Close()
-    {
-        gameObject.SetActive(false);
-    }
-
+    
     public void OnClickContinueButton()
     {
+        Debug.Log("Continue");
         GameManager.Instance.Continue();
         gameObject.SetActive(false);
     }

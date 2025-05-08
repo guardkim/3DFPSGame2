@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -30,7 +31,6 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private float readyDuration = 3f; // 준비 시간(초)
     [SerializeField] private float gameOverDisplayDuration = 3f; // 게임오버 표시 시간(초)
 
-    public UI_OptionPopup optionPopup;
     // 게임이 시작될 때 호출
     void Start()
     {
@@ -48,12 +48,6 @@ public class GameManager : Singleton<GameManager>
         {
             RestartGame();
         }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        { 
-            // 게임 일시 정지
-            Pause();
-        }
     }
     public void Pause()
     {
@@ -70,7 +64,7 @@ public class GameManager : Singleton<GameManager>
         CurrentGameState = GameState.Ready;
         Time.timeScale = 1;
 
-        Cursor.lockState = CursorLockMode.None;
+        Cursor.lockState = CursorLockMode.Confined;
 
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(currentSceneIndex);
@@ -100,13 +94,8 @@ public class GameManager : Singleton<GameManager>
                 Time.timeScale = 1f;
                 if (CameraManager.Instance.CameraType != CameraType.ISO)
                     Cursor.lockState = CursorLockMode.Locked;
-                optionPopup.Close();
                 // Play 이미지 표시
-                if (stateImage != null && playSprite != null)
-                {
-                    stateImage.gameObject.SetActive(true);
-                    stateImage.sprite = playSprite;
-                }
+
                 break;
 
             case GameState.GameOver:
@@ -122,8 +111,8 @@ public class GameManager : Singleton<GameManager>
                 break;
             case GameState.Pause:
                 Time.timeScale = 0;
-                Cursor.lockState = CursorLockMode.None;
-                optionPopup.Open();
+                Cursor.lockState = CursorLockMode.Confined;
+                PopupManager.Instance.Open(EPopupType.UI_OptionPopup, Continue);
                 break;
         }
     }
@@ -152,6 +141,11 @@ public class GameManager : Singleton<GameManager>
             countdownText.gameObject.SetActive(false);
 
         // Play 상태로 전환
+        if (stateImage != null && playSprite != null)
+        {
+            stateImage.gameObject.SetActive(true);
+            stateImage.sprite = playSprite;
+        }
         SetGameState(GameState.Play);
 
         // Play 이미지 잠시 표시 후 숨기기

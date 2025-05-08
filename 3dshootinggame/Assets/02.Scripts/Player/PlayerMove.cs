@@ -48,7 +48,6 @@ public class PlayerMove : MonoBehaviour
     
     void Update()
     {
-        Debug.Log($"{_ani}");
         // 키 입력 처리
         GetInputs();
         UpdateAnimations();

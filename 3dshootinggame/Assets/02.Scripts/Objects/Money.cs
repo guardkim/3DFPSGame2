@@ -4,7 +4,7 @@ using UnityEngine;
 public class Money : MonoBehaviour
 {
     
-   [SerializeField]private MeshCollider _meshCollider;
+   [SerializeField]private SphereCollider _collider;
    [SerializeField]private Transform _playerTransform;
    [SerializeField]private bool _isSpawned = false;
    [SerializeField]private Ease _magnetEase = Ease.OutQuad;
@@ -13,7 +13,7 @@ public class Money : MonoBehaviour
     private Player _player;
     private void Awake()
     {
-        _meshCollider = GetComponent<MeshCollider>();
+        _collider = GetComponent<SphereCollider>();
         GameObject obj = GameObject.FindGameObjectWithTag("Player");
         if(obj != null)
         {
@@ -27,13 +27,13 @@ public class Money : MonoBehaviour
     }
     public void Init()
     {
-        _meshCollider.enabled = false;
+        _collider.enabled = false;
         gameObject.SetActive(false);
     }
 
     public void Spawn()
     {
-        _meshCollider.enabled = true;
+        _collider.enabled = true;
         gameObject.SetActive(true);
 
         _magnetTween?.Kill();
@@ -72,7 +72,7 @@ public class Money : MonoBehaviour
 
         _magnetTween.ChangeValues(currentPos, targetPos, remainingDuration);
     }
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider collision)
     {
         if (collision.gameObject.CompareTag("Player"))
         {

@@ -3,30 +3,43 @@ using UnityEngine;
 
 public class Money : MonoBehaviour
 {
-    private MeshCollider _meshCollider;
-    private Rigidbody _rigidbody;
-    private Player _player;
-    private bool _isSpawned = false;
+    
+   [SerializeField]private MeshCollider _meshCollider;
+   [SerializeField]private Transform _playerTransform;
+   [SerializeField]private bool _isSpawned = false;
+   [SerializeField]private Ease _magnetEase = Ease.OutQuad;
+   [SerializeField]private Tweener _magnetTween;
 
-    private Ease _magnetEase = Ease.OutQuad;
-    private Tweener _magnetTween;
+    private Player _player;
+    private void Awake()
+    {
+        _meshCollider = GetComponent<MeshCollider>();
+        GameObject obj = GameObject.FindGameObjectWithTag("Player");
+        if(obj != null)
+        {
+            _playerTransform = obj.transform;
+            _player = obj.GetComponent<Player>();
+        }
+        else
+        {
+            Debug.LogError("Player not found");
+        }
+    }
     public void Init()
     {
         _meshCollider.enabled = false;
-        _rigidbody.isKinematic = true;
         gameObject.SetActive(false);
     }
 
     public void Spawn()
     {
         _meshCollider.enabled = true;
-        _rigidbody.isKinematic = false;
         gameObject.SetActive(true);
 
         _magnetTween?.Kill();
 
         _magnetTween = transform
-            .DOMove(_player.transform.position, 1f)      // 초기 duration은 값에 상관없음, SetSpeedBased 사용 :contentReference[oaicite:1]{index=1}
+            .DOMove(_playerTransform.position, 1f)      // 초기 duration은 값에 상관없음, SetSpeedBased 사용 :contentReference[oaicite:1]{index=1}
             .SetSpeedBased(true)               // speed 기반 이동으로 변경
             .SetEase(Ease.Linear)
             .SetAutoKill(false)                // 끝나도 자동으로 죽지 않게
@@ -39,6 +52,7 @@ public class Money : MonoBehaviour
         // ...
 
         // 풀로 반환
+        _magnetTween?.Kill();
         _magnetTween = null;
         gameObject.SetActive(false);
     }
@@ -50,16 +64,28 @@ public class Money : MonoBehaviour
     }
     private void UpdateTarget()
     {
-        // tween의 목표 위치를 플레이어 현재 위치로 변경
-        _magnetTween.ChangeEndValue(_player.transform.position, true);
+        if (_magnetTween == null || _playerTransform == null) return;
+
+        Vector3 currentPos = transform.position;
+        Vector3 targetPos = _playerTransform.position;
+        float remainingDuration = _magnetTween.Duration(false) - _magnetTween.Elapsed(false);
+
+        _magnetTween.ChangeValues(currentPos, targetPos, remainingDuration);
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            // Player와 충돌 시 처리
+            Debug.Log($"Money Player와 충돌");
+            _player.PlayerMoney += 1;
+            UI_Manager.Instance.SetMoney(_player.PlayerMoney);
+            OnArrived();
+        }
     }
     void Start()
     {
-        GameObject obj = GameObject.FindGameObjectWithTag("Player");
-        if (obj != null)
-        {
-            _player = obj.GetComponent<Player>();
-        }
+        
     }
 
     void Update()

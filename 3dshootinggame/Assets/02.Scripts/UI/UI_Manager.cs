@@ -14,6 +14,7 @@ public class UI_Manager : Singleton<UI_Manager>
     public Image GunIcon;
     public Image SwordIcon;
     public Image BombIcon;
+    public TextMeshProUGUI MoneyText;
 
     public bool IsReloading = false;
     private float _reloadTime = 2.0f;
@@ -26,6 +27,11 @@ public class UI_Manager : Singleton<UI_Manager>
         GunIcon.color = new Color(1, 1, 1, 1.0f);
         SwordIcon.color = new Color(1, 1, 1, 0.2f);
         BombIcon.color = new Color(1, 1, 1, 0.2f);
+        MoneyText.text = $": 0";
+    }
+    public void SetMoney(int count)
+    {
+        MoneyText.text = $": {count.ToString()}";
     }
     public void BloodFade()
     {

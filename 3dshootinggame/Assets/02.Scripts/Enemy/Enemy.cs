@@ -83,6 +83,10 @@ public class Enemy : MonoBehaviour, IDamageable
                         Patrol();
                         break;
                     }
+                case EnemyState.Die:
+                    {
+                        break;
+                    }   
             }
     }
     private void TraceType()
@@ -165,6 +169,7 @@ public class Enemy : MonoBehaviour, IDamageable
             Debug.Log($"상태 전환 : {CurrentState} -> Die");
             CurrentState = EnemyState.Die;
             _animator.SetTrigger("Die");
+            MoneyPool.Instance.Create(transform.position, 23);
             StartCoroutine(Die_Coroutine());
             return;
         }

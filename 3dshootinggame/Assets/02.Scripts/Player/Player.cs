@@ -11,6 +11,7 @@ public class Player : MonoBehaviour, IDamageable
 {
     public float PlayerHP = 300.0f;
     public float _maxHP = 300.0f;
+    public int PlayerMoney = 0;
     public Slider HPBar;
     public GameObject Gun;
     public GameObject Sword;

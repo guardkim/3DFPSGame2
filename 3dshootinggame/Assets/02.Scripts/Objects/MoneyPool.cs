@@ -28,7 +28,7 @@ public class MoneyPool : Singleton<MoneyPool>
     {
         List<Money> moneyList = new List<Money>(count);
         int createCount = 0;
-
+        Debug.Log($"CreateCount : {count}");
         foreach (Money money in _moneys)
         {
             if (money.gameObject.activeInHierarchy == false)
